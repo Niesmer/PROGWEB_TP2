@@ -56,6 +56,17 @@ CREATE TABLE IF NOT EXISTS Devis(
     FOREIGN KEY (code_client) REFERENCES Clients(code_client)
 );
 
+CREATE TABLE IF NOT EXISTS Lignes_Devis(
+    code_ligne INT PRIMARY KEY AUTO_INCREMENT,
+    code_devis INT,
+    code_article VARCHAR(3),
+    quantite INT,
+    prix_unitaire_ht DECIMAL(10, 2),
+    montant_ht DECIMAL(10, 2),
+    FOREIGN KEY (code_devis) REFERENCES Devis(code_devis),
+    FOREIGN KEY (code_article) REFERENCES Articles(code_article)
+);
+
 INSERT IGNORE INTO Pays (code_pays, libelle) VALUES
 ('FR', 'France'),
 ('BE', 'Belgique'),

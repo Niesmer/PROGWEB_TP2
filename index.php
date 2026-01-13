@@ -12,8 +12,8 @@ $db_connection->query("CREATE DATABASE IF NOT EXISTS poly_php;");
 $db_connection->query("USE poly_php");
 
 $sql = false;
-if (file_exists('data.sql')) {
-    $sql = file_get_contents('data.sql');
+if (file_exists('base_poly.sql')) {
+    $sql = file_get_contents('base_poly.sql');
 }
 if ($sql !== false) {
     try {
