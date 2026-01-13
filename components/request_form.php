@@ -306,13 +306,14 @@ document.getElementById('btnAddLine').addEventListener('click', () => {
     tr.id = 'ligne-' + ligneIndex;
     tr.className = 'border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700';
     tr.innerHTML = `
+        <input type="hidden" name="lignes[${ligneIndex}][code]" value="${code}">
         <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">${code}</td>
         <td class="px-4 py-3">${designation}</td>
-        <td class="px-4 py-3 text-center">${quantite.toFixed(2)}</td>
+        <td class="px-4 py-3 text-center"><input id="quantite-${ligneIndex}" class="bg-transparent border-transparent text-center" type="number" name="lignes[${ligneIndex}][quantite]" step="0.01" value="${quantite.toFixed(2)}"></td>
         <td class="px-4 py-3 text-center">${unite}</td>
         <td class="px-4 py-3 text-right">${forfait.toFixed(2)} €</td>
         <td class="px-4 py-3 text-right">${tva.toFixed(2)} %</td>
-        <td class="px-4 py-3 text-right font-medium">${montantHT.toFixed(2)} €</td>
+        <td id="montantHT-${ligneIndex}" class="px-4 py-3 text-right font-medium">${montantHT.toFixed(2)} €</td>
         <td class="px-4 py-3 text-center">
             <button type="button" onclick="supprimerLigne(${ligneIndex})" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,10 +321,20 @@ document.getElementById('btnAddLine').addEventListener('click', () => {
                 </svg>
             </button>
         </td>
-        <input type="hidden" name="lignes[${ligneIndex}][code]" value="${code}">
-        <input type="hidden" name="lignes[${ligneIndex}][quantite]" value="${quantite}">
     `;
     tbody.appendChild(tr);
+    document.getElementById('quantite-' + ligneIndex).addEventListener('change', (e) => {
+        const newQuantite = parseFloat(e.target.value);
+        const ligne = lignesDevis.find(l => l.index === ligneIndex-1);
+        if (ligne && newQuantite > 0) {
+            console.log('Updating quantity for line index', ligneIndex, 'to', newQuantite);
+            ligne.quantite = newQuantite;
+            ligne.montantHT = newQuantite * ligne.forfait;
+            tr.querySelector('#montantHT-' + (ligneIndex-1)).textContent = ligne.montantHT.toFixed(2) + ' €';
+            calculerTotaux();
+        }
+    });
+
     
     ligneIndex++;
     

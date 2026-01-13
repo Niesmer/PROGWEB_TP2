@@ -1,15 +1,108 @@
 <?php
 $db_connection = new PDO("mysql:host=localhost;dbname=poly_php", "user1", "hcetylop");
+$db_connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-echo(json_encode($_POST));
+// Check if we have the required data
+if (!isset($_POST['code_client']) || empty($_POST['code_client'])) {
+    die("Erreur: Aucun client sélectionné.");
+}
 
-foreach ($_POST['lignes'] as $ligne) {
-    $stmt = $db_connection->prepare("INSERT INTO Lignes_Devis (code_devis, description, quantite, prix_unitaire, total_ht) VALUES (:code_devis, :description, :quantite, :prix_unitaire, :total_ht)");
-    $stmt->bindParam(':code_devis', $_POST['code_devis']);
-    $stmt->bindParam(':description', $ligne['description']);
-    $stmt->bindParam(':quantite', $ligne['quantite']);
-    $stmt->bindParam(':prix_unitaire', $ligne['prix_unitaire']);
-    $stmt->bindParam(':total_ht', $ligne['total_ht']);
-    $stmt->execute();
+if (!isset($_POST['lignes']) || empty($_POST['lignes'])) {
+    die("Erreur: Aucune ligne de devis.");
+}
+
+$code_client = intval($_POST['code_client']);
+$lignes = $_POST['lignes'];
+
+try {
+    // Start transaction
+    $db_connection->beginTransaction();
+    
+    // Calculate totals
+    $montant_ht_total = 0;
+    $montant_tva_total = 0;
+    
+    // Get article info for each line to calculate TVA
+    foreach ($lignes as $ligne) {
+        $code_article = $ligne['code'];
+        $quantite = floatval($ligne['quantite']);
+        
+        // Get article price and TVA rate
+        $stmt = $db_connection->prepare("
+            SELECT a.forfait_ht, t.taux 
+            FROM Articles a 
+            LEFT JOIN TVA t ON a.code_tva = t.code_tva 
+            WHERE a.code_article = :code_article
+        ");
+        $stmt->execute([':code_article' => $code_article]);
+        $article = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($article) {
+            $prix_unitaire_ht = floatval($article['forfait_ht']);
+            $taux_tva = floatval($article['taux']);
+            $montant_ht_ligne = $quantite * $prix_unitaire_ht;
+            $montant_tva_ligne = $montant_ht_ligne * ($taux_tva / 100);
+            
+            $montant_ht_total += $montant_ht_ligne;
+            $montant_tva_total += $montant_tva_ligne;
+        }
+    }
+    
+    $montant_ttc_total = $montant_ht_total + $montant_tva_total;
+    
+    // Insert the devis
+    $stmt = $db_connection->prepare("
+        INSERT INTO Devis (code_client, date_devis, montant_ht, montant_ttc) 
+        VALUES (:code_client, CURDATE(), :montant_ht, :montant_ttc)
+    ");
+    $stmt->execute([
+        ':code_client' => $code_client,
+        ':montant_ht' => $montant_ht_total,
+        ':montant_ttc' => $montant_ttc_total
+    ]);
+    
+    $code_devis = $db_connection->lastInsertId();
+    
+    // Insert each line
+    foreach ($lignes as $ligne) {
+        $code_article = $ligne['code'];
+        $quantite = floatval($ligne['quantite']);
+        
+        // Get article price
+        $stmt = $db_connection->prepare("
+            SELECT forfait_ht FROM Articles WHERE code_article = :code_article
+        ");
+        $stmt->execute([':code_article' => $code_article]);
+        $article = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($article) {
+            $prix_unitaire_ht = floatval($article['forfait_ht']);
+            $montant_ht_ligne = $quantite * $prix_unitaire_ht;
+            
+            $stmt = $db_connection->prepare("
+                INSERT INTO Lignes_Devis (code_devis, code_article, quantite, prix_unitaire_ht, montant_ht) 
+                VALUES (:code_devis, :code_article, :quantite, :prix_unitaire_ht, :montant_ht)
+            ");
+            $stmt->execute([
+                ':code_devis' => $code_devis,
+                ':code_article' => $code_article,
+                ':quantite' => $quantite,
+                ':prix_unitaire_ht' => $prix_unitaire_ht,
+                ':montant_ht' => $montant_ht_ligne
+            ]);
+        }
+    }
+    
+    // Commit transaction
+    $db_connection->commit();
+    
+    // Redirect back to user page with client code
+    header("Location: fiche_client.php?client=" . $code_client . "&devis_created=" . $code_devis);
+    exit();
+    
+} catch (PDOException $e) {
+    // Rollback on error
+    $db_connection->rollBack();
+    die("Erreur lors de l'enregistrement du devis: " . $e->getMessage());
 }
 ?>
