@@ -1,8 +1,34 @@
 <?php
-// Récupérer les infos du client si passé en paramètre
 $code_client = $_GET['client'] ?? null;
 $client_info = null;
 
+$devis = $_GET['devis'] ?? null;
+
+if ($devis && isset($db_connection)) {
+    $stmt = $db_connection->prepare("
+        SELECT d.*, c.nom, c.prenom
+        FROM Devis d
+        LEFT JOIN Clients c ON d.code_client = c.code_client
+        WHERE d.code_devis = :code_devis
+    ");
+    $stmt->execute([':code_devis' => $devis]);
+    $devis_info = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($devis_info) {
+        $stmt = $db_connection->prepare("
+            SELECT ld.*, a.designation, a.forfait_ht, t.taux AS tva_taux
+            FROM Lignes_Devis ld
+            LEFT JOIN Articles a ON ld.code_article = a.code_article
+            LEFT JOIN TVA t ON a.code_tva = t.code_tva
+            WHERE ld.code_devis = :code_devis
+        ");
+        $stmt->execute([':code_devis' => $devis]);
+        $lignes_devis = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $devis_info['lignes'] = $lignes_devis;
+    }
+
+    var_dump($devis_info);
+}
 if ($code_client && isset($db_connection)) {
     $stmt = $db_connection->prepare("
         SELECT c.*, p.libelle AS pays_libelle, f.libelle AS forme_libelle
@@ -159,9 +185,10 @@ if (isset($db_connection)) {
                     </thead>
                     <tbody id="lignesDevis">
                         <tr id="emptyRow">
-                            <td colspan="8" class="px-4 py-8 text-center text-gray-400">
+                            <? if (!$devis_info): ?>
+                             <td colspan="8" class="px-4 py-8 text-center text-gray-400">
                                 Aucun article ajouté. Utilisez la recherche ci-dessus pour ajouter des articles.
-                            </td>
+                            </td>                            
                         </tr>
                     </tbody>
                 </table>
@@ -327,7 +354,6 @@ document.getElementById('btnAddLine').addEventListener('click', () => {
         const newQuantite = parseFloat(e.target.value);
         const ligne = lignesDevis.find(l => l.index === ligneIndex-1);
         if (ligne && newQuantite > 0) {
-            console.log('Updating quantity for line index', ligneIndex, 'to', newQuantite);
             ligne.quantite = newQuantite;
             ligne.montantHT = newQuantite * ligne.forfait;
             tr.querySelector('#montantHT-' + (ligneIndex-1)).textContent = ligne.montantHT.toFixed(2) + ' €';

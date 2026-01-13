@@ -1,33 +1,6 @@
 <?php
-$db_connection = new PDO("mysql:host=localhost", "root", "");
+require_once 'Ressources_communes.php';
 
-# Permet de créer un nouvel utilisateur user1 avec tout les privilèges
-$db_connection->query("CREATE USER IF NOT EXISTS 'user1'@'localhost' IDENTIFIED BY 'hcetylop'");
-$db_connection->query("GRANT ALL PRIVILEGES ON *.* TO 'user1'@'localhost' WITH GRANT OPTION");
-
-# On recrée une connection au serveur Mysql en se connectant avec le nouvel utilisateur
-$db_connection = new PDO("mysql:host=localhost", "user1", "hcetylop");
-
-$db_connection->query("CREATE DATABASE IF NOT EXISTS poly_php;");
-$db_connection->query("USE poly_php");
-
-$sql = false;
-if (file_exists('data.sql')) {
-    $sql = file_get_contents('data.sql');
-}
-if ($sql !== false) {
-    try {
-        $statements = explode(';', $sql);
-        foreach ($statements as $statement) {
-            if (!empty($statement)) {
-                $db_connection->exec($statement);
-            }
-        }
-    } catch (PDOException $e) {
-    }
-}
-
-// Récupérer le code client depuis l'URL
 $code_client = $_GET['client'] ?? null;
 $client_info = null;
 $devis_created = $_GET['devis_created'] ?? null;
@@ -133,20 +106,20 @@ if ($client_info['date_entree']) {
                 </div>
 
                 <!-- En-tête client -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
                     <div class="px-6 py-8">
                         <div class="flex justify-between">
                             <div class="flex items-center gap-4">
                                 <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
-                                    <span class="text-3xl font-bold text-white">
+                                    <span class="text-3xl font-bold dark:text-white">
                                         <?= strtoupper(substr($client_info['prenom'], 0, 1) . substr($client_info['nom'], 0, 1)) ?>
                                     </span>
                                 </div>
                                 <div>
-                                    <h1 class="text-2xl font-bold text-white">
+                                    <h1 class="text-2xl font-bold dark:text-white">
                                         <?= htmlspecialchars($client_info['prenom'] . ' ' . $client_info['nom']) ?>
                                     </h1>
-                                    <p class="text-white mt-1">
+                                    <p class="dark:text-white mt-1">
                                         <?= htmlspecialchars($client_info['forme_libelle'] ?? 'Particulier') ?>
                                     </p>
                                 </div>
@@ -321,10 +294,6 @@ if ($client_info['date_entree']) {
 
                     <?php if (empty($devis_list)): ?>
                     <div class="text-center py-8">
-                        <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
                         <p class="text-gray-500 dark:text-gray-400 mb-4">Aucun devis pour ce client</p>
                         <a href="devis_client.php?client=<?= $client_info['code_client'] ?>"
                             class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700">

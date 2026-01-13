@@ -1,31 +1,5 @@
 <?php
-$db_connection = new PDO("mysql:host=localhost", "root", "");
-
-# Permet de créer un nouvel utilisateur user1 avec tout les privilèges
-$db_connection->query("CREATE USER IF NOT EXISTS 'user1'@'localhost' IDENTIFIED BY 'hcetylop'");
-$db_connection->query("GRANT ALL PRIVILEGES ON *.* TO 'user1'@'localhost' WITH GRANT OPTION");
-
-# On recrée une connection au serveur Mysql en se connectant avec le nouvel utilisateur
-$db_connection = new PDO("mysql:host=localhost", "user1", "hcetylop");
-
-$db_connection->query("CREATE DATABASE IF NOT EXISTS poly_php;");
-$db_connection->query("USE poly_php");
-
-$sql = false;
-if (file_exists('data.sql')) {
-    $sql = file_get_contents('data.sql');
-}
-if ($sql !== false) {
-    try {
-        $statements = explode(';', $sql);
-        foreach ($statements as $statement) {
-            if (!empty($statement)) {
-                $db_connection->exec($statement);
-            }
-        }
-    } catch (PDOException $e) {
-    }
-}
+require_once 'Ressources_communes.php';
 ?>
 
 <!DOCTYPE html>
