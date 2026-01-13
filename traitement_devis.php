@@ -1,6 +1,5 @@
 <?php
-$db_connection = new PDO("mysql:host=localhost;dbname=poly_php", "user1", "hcetylop");
-$db_connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+require_once 'Ressources_communes.php';
 
 // Check if we have the required data
 if (!isset($_POST['code_client']) || empty($_POST['code_client'])) {
@@ -12,7 +11,9 @@ if (!isset($_POST['lignes']) || empty($_POST['lignes'])) {
 }
 
 $code_client = intval($_POST['code_client']);
+$code_devis = isset($_POST['code_devis']) ? intval($_POST['code_devis']) : null;
 $lignes = $_POST['lignes'];
+$is_update = !empty($code_devis);
 
 try {
     // Start transaction
@@ -50,20 +51,38 @@ try {
     
     $montant_ttc_total = $montant_ht_total + $montant_tva_total;
     
-    // Insert the devis
-    $stmt = $db_connection->prepare("
-        INSERT INTO Devis (code_client, date_devis, montant_ht, montant_ttc) 
-        VALUES (:code_client, CURDATE(), :montant_ht, :montant_ttc)
-    ");
-    $stmt->execute([
-        ':code_client' => $code_client,
-        ':montant_ht' => $montant_ht_total,
-        ':montant_ttc' => $montant_ttc_total
-    ]);
+    if ($is_update) {
+        // Update existing devis
+        $stmt = $db_connection->prepare("
+            UPDATE Devis 
+            SET montant_ht = :montant_ht, montant_ttc = :montant_ttc 
+            WHERE code_devis = :code_devis
+        ");
+        $stmt->execute([
+            ':montant_ht' => $montant_ht_total,
+            ':montant_ttc' => $montant_ttc_total,
+            ':code_devis' => $code_devis
+        ]);
+        
+        // Delete existing lines
+        $stmt = $db_connection->prepare("DELETE FROM Lignes_Devis WHERE code_devis = :code_devis");
+        $stmt->execute([':code_devis' => $code_devis]);
+    } else {
+        // Insert new devis
+        $stmt = $db_connection->prepare("
+            INSERT INTO Devis (code_client, date_devis, montant_ht, montant_ttc) 
+            VALUES (:code_client, CURDATE(), :montant_ht, :montant_ttc)
+        ");
+        $stmt->execute([
+            ':code_client' => $code_client,
+            ':montant_ht' => $montant_ht_total,
+            ':montant_ttc' => $montant_ttc_total
+        ]);
+        
+        $code_devis = $db_connection->lastInsertId();
+    }
     
-    $code_devis = $db_connection->lastInsertId();
-    
-    // Insert each line
+    // Insert lines (for both new and update)
     foreach ($lignes as $ligne) {
         $code_article = $ligne['code'];
         $quantite = floatval($ligne['quantite']);
@@ -96,13 +115,16 @@ try {
     // Commit transaction
     $db_connection->commit();
     
-    // Redirect back to user page with client code
-    header("Location: fiche_client.php?client=" . $code_client . "&devis_created=" . $code_devis);
+    // Redirect back to client page with appropriate message
+    $param = $is_update ? 'devis_updated' : 'devis_created';
+    header("Location: fiche_client.php?client=" . $code_client . "&" . $param . "=" . $code_devis);
     exit();
     
 } catch (PDOException $e) {
     // Rollback on error
-    $db_connection->rollBack();
+    if ($db_connection->inTransaction()) {
+        $db_connection->rollBack();
+    }
     die("Erreur lors de l'enregistrement du devis: " . $e->getMessage());
 }
 ?>
