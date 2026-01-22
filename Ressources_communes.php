@@ -31,6 +31,6 @@ function InitDB()
         die($e->getMessage());
     }
 }
-
+InitDB();
 $db_connection = connectDB("user1", "hcetylop", "poly_php");
 ?>
