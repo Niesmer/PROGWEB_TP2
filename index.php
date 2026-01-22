@@ -52,7 +52,12 @@ if (!empty($filter_pays)) {
     }
 }
 
-$has_active_filters = !empty($search) || !empty($filter_forme) || !empty($filter_motif) || !empty($filter_pays);
+$active_date_label = '';
+if (!empty($filter_start_membership)) {
+    $active_date_label = date('d/m/Y', strtotime($filter_start_membership));
+}
+
+$has_active_filters = !empty($search) || !empty($filter_forme) || !empty($filter_motif) || !empty($filter_pays) || !empty($filter_start_membership);
 
 // Construction de la requête avec filtres
 $sql_clients = "
@@ -93,6 +98,11 @@ if (!empty($filter_motif)) {
 if (!empty($filter_pays)) {
     $sql_clients .= " AND c.code_pays = :pays";
     $params[':pays'] = $filter_pays;
+}
+
+if (!empty($filter_start_membership)) {
+    $sql_clients .= " AND c.date_entree >= :start_membership";
+    $params[':start_membership'] = $filter_start_membership;
 }
 
 $sql_clients .= " ORDER BY c.nom, c.prenom";
@@ -241,6 +251,18 @@ $clients = $query->fetchAll(PDO::FETCH_ASSOC);
                                 <a href="<?= buildUrlWithoutParam('pays') ?>"
                                     class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 hover:bg-yellow-200">
                                     Pays: <?= htmlspecialchars($active_pays_label) ?>
+                                    <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            <?php endif; ?>
+
+                            <?php if (!empty($active_date_label)): ?>
+                                <a href="<?= buildUrlWithoutParam('start-membership') ?>"
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-white hover:bg-purple-200">
+                                    Date d'entrée depuis: <?= htmlspecialchars($active_date_label) ?>
                                     <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
