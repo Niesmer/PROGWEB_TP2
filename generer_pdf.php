@@ -1,4 +1,24 @@
 <?php
+require_once 'Ressources_communes.php';
+
+$code_client = $_POST['code_client'] ?? null;
+$lignes_json = $_POST['lignes_json'] ?? '[]';
+$lignes = json_decode($lignes_json, true);
+
+// Récupérer les infos du client
+$client_info = null;
+if ($code_client) {
+    $stmt = $db_connection->prepare("
+        SELECT c.*, p.libelle AS pays_libelle, f.libelle AS forme_libelle
+        FROM Clients c
+        LEFT JOIN Pays p ON c.code_pays = p.code_pays
+        LEFT JOIN Formes_Juridiques f ON c.code_forme = f.code_forme
+        WHERE c.code_client = :code_client
+    ");
+    $stmt->execute([':code_client' => $code_client]);
+    $client_info = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 $totalHT = 0;
 $tvaMap = [];
 
@@ -16,15 +36,13 @@ foreach ($lignes as $ligne) {
 
 $totalTVA = array_sum($tvaMap);
 $totalTTC = $totalHT + $totalTVA;
-
-$numDevis = 'DEV-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Devis <?= $numDevis ?></title>
+    <link rel="stylesheet" href="global.css">
     <style>
         @page {
             margin: 20mm;
@@ -50,15 +68,10 @@ $numDevis = 'DEV-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_
         <!-- Header -->
         <div class="flex justify-between mb-8 pb-5 border-b-2 border-blue-600">
             <div>
-                <h1 class="text-2xl font-bold text-blue-600 mb-2">SAV SERVICES</h1>
-                <p class="text-gray-600">123 Rue de la Réparation</p>
-                <p class="text-gray-600">75001 Paris, France</p>
-                <p class="text-gray-600">Tél: 01 23 45 67 89</p>
-                <p class="text-gray-600">Email: contact@sav-services.fr</p>
+                <h1 class="text-2xl font-bold text-blue-600 mb-2">POLY Industrie</h1>
             </div>
             <div class="text-right">
                 <h2 class="text-xl font-bold text-blue-600 mb-2">DEVIS</h2>
-                <p><strong>N°:</strong> <?= $numDevis ?></p>
                 <p><strong>Date:</strong> <?= date('d/m/Y') ?></p>
                 <p><strong>Validité:</strong> 30 jours</p>
             </div>
@@ -156,7 +169,7 @@ $numDevis = 'DEV-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_
 
         <!-- Footer -->
         <div class="border-t border-gray-200 pt-5 text-center text-xs text-gray-600">
-            <p>SAV SERVICES - SIRET: 123 456 789 00012 - TVA Intracommunautaire: FR12345678900</p>
+            <p>POLY Industrie</p>
             <p>Ce devis est valable 30 jours à compter de sa date d'émission.</p>
         </div>
     </div>

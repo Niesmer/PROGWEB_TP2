@@ -70,9 +70,7 @@ if (isset($db_connection)) {
                     <p class="text-gray-600 dark:text-gray-400 mt-1">Date: <?= date('d/m/Y') ?></p>
                 </div>
                 <div class="text-right">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">SAV SERVICES</h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">123 Rue de la Réparation</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">75001 Paris, France</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">POLY Industrie</h2>
                 </div>
             </div>
         </div>
