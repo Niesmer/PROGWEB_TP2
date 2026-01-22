@@ -239,9 +239,9 @@ if (isset($db_connection)) {
 
             <!-- Boutons d'action -->
             <div class="flex justify-between mt-6">
-                <a href="recherche_client.php"
+                <a href="fiche_client.php?client=<?= urlencode($code_client ?? '') ?>"
                     class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700">
-                    ← Retour à la recherche
+                    ← Retour
                 </a>
                 <div class="flex gap-3">
                     <button type="button" id="btnPrintPDF"
