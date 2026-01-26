@@ -46,6 +46,46 @@ $stmt = $db_connection->prepare("
 $stmt->execute([':code_client' => $code_client]);
 $devis_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Récupérer les filtres de recherche de devis  si soumis
+$date_debut = $_GET['date_debut'] ?? null;
+$montant_min = $_GET['montant_min'] ?? null;
+$montant_max = $_GET['montant_max'] ?? null;
+
+// Construction dynamique de la requête
+$sql_devis = "
+    SELECT d.*, 
+           (SELECT COUNT(*) FROM Lignes_Devis ld WHERE ld.code_devis = d.code_devis) AS nb_lignes,
+           d.status_devis
+    FROM Devis d
+    WHERE d.code_client = :code_client
+";
+
+$params = [':code_client' => $code_client];
+
+// Filtre date
+if (!empty($date_debut)) {
+    $sql_devis .= " AND d.date_devis >= :date_debut";
+    $params[':date_debut'] = $date_debut;
+}
+
+// Filtre montant HT
+if (!empty($montant_min)) {
+    $sql_devis .= " AND d.montant_ht >= :montant_min";
+    $params[':montant_min'] = $montant_min;
+}
+if (!empty($montant_max)) {
+    $sql_devis .= " AND d.montant_ht <= :montant_max";
+    $params[':montant_max'] = $montant_max;
+}
+
+$sql_devis .= " ORDER BY d.date_devis DESC, d.code_devis DESC";
+
+$stmt = $db_connection->prepare($sql_devis);
+$stmt->execute($params);
+$devis_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
 // Calculer l'âge si date de naissance disponible
 $age = null;
 if ($client_info['date_naissance']) {
@@ -309,6 +349,34 @@ if ($client_info['date_entree']) {
                             </svg>
                             Devis du client
                         </h2>
+                        <!-- Formulaire de recherche de devis -->
+                        <form method="get" class="mb-6 flex gap-4 flex-wrap items-end">
+                            <input type="hidden" name="client" value="<?= htmlspecialchars($code_client) ?>">
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date à partir</label>
+                                <input type="date" name="date_debut" value="<?= htmlspecialchars($date_debut) ?>"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Montant min (€)</label>
+                                <input type="number" step="0.01" name="montant_min" value="<?= htmlspecialchars($montant_min) ?>"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Montant max (€)</label>
+                                <input type="number" step="0.01" name="montant_max" value="<?= htmlspecialchars($montant_max) ?>"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            </div>
+
+                            <div>
+                                <button type="submit"
+                                        class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Filtrer</button>
+                            </div>
+                        </form>
+
                         <span class="text-sm text-gray-500 dark:text-gray-400">
                             <?= count($devis_list) ?> devis
                         </span>

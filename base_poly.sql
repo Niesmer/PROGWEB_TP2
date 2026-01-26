@@ -68,6 +68,14 @@ CREATE TABLE IF NOT EXISTS Lignes_Devis(
     FOREIGN KEY (code_article) REFERENCES Articles(code_article)
 );
 
+CREATE TABLE DevisDocs (
+    code_devis INT PRIMARY KEY,
+    chemin_fichier VARCHAR(255) NOT NULL,
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (code_devis) REFERENCES Devis(code_devis)
+);
+
+
 INSERT IGNORE INTO Pays (code_pays, libelle) VALUES
 ('FR', 'France'),
 ('BE', 'Belgique'),
