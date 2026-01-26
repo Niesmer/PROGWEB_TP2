@@ -5,6 +5,8 @@ $code_client = $_GET['client'] ?? null;
 $client_info = null;
 $devis_created = $_GET['devis_created'] ?? null;
 $devis_updated = $_GET['devis_updated'] ?? null;
+$code_devis  = $_POST['code_devis'] ?? null;
+
 
 if (!$code_client) {
     header('Location: recherche_client.php');
@@ -34,7 +36,9 @@ if (!$client_info) {
 // Récupérer les devis du client
 $stmt = $db_connection->prepare("
     SELECT d.*, 
-           (SELECT COUNT(*) FROM Lignes_Devis ld WHERE ld.code_devis = d.code_devis) AS nb_lignes
+           (SELECT COUNT(*) FROM Lignes_Devis ld WHERE ld.code_devis = d.code_devis) AS nb_lignes,
+             d.status_devis
+
     FROM Devis d
     WHERE d.code_client = :code_client
     ORDER BY d.date_devis DESC, d.code_devis DESC
@@ -331,11 +335,24 @@ if ($client_info['date_entree']) {
                                     <th class="px-4 py-3 text-center">Lignes</th>
                                     <th class="px-4 py-3 text-right">Montant HT</th>
                                     <th class="px-4 py-3 text-right">Montant TTC</th>
+                                    <th class="px-4 py-3 text-center">Status</th>
                                     <th class="px-4 py-3 text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($devis_list as $devis): ?>
+                                <?php
+                                    $labels_status = [
+                                        0 => 'En cours',
+                                        1 => 'Imprimé',
+                                        2 => 'Validé'
+                                    ];
+                                    $color_status = [
+                                        0 => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                                        1 => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                                        2 => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                    ];
+                                ?> 
                                 <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
                                         #<?= htmlspecialchars($devis['code_devis']) ?>
@@ -355,9 +372,17 @@ if ($client_info['date_entree']) {
                                         <?= number_format($devis['montant_ttc'], 2, ',', ' ') ?> €
                                     </td>
                                     <td class="px-4 py-3 text-center">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-sm font-semibold <?= $color_status[$devis['status_devis']] ?>">
+                                            <?= $labels_status[$devis['status_devis']] ?>
+                                        </span>
+                                    </td>
+
+
+                                    <td class="px-4 py-3 text-center">
                                         <div class="flex justify-center gap-2">
                                             <!-- Voir/Modifier -->
-                                            <a href="devis_client.php?client=<?= $code_client ?>&devis=<?= $devis['code_devis'] ?>"
+                                           <?php if ($devis['status_devis'] != 2): ?>
+                                                <a href="devis_client.php?client=<?= $code_client ?>&devis=<?= $devis['code_devis'] ?>"
                                                 class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-primary-700 bg-primary-100 rounded-lg hover:bg-primary-200 dark:bg-primary-900 dark:text-primary-300 dark:hover:bg-primary-800"
                                                 title="Modifier le devis">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -366,6 +391,18 @@ if ($client_info['date_entree']) {
                                                 </svg>
                                                 Modifier
                                             </a>
+                                            <?php endif; ?>
+
+                                            <!-- voir -->
+                                             <a href="consulter_devis.php?devis=<?= $devis['code_devis'] ?>" 
+                                                class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                                title="Voir le devis">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                Consulter
+                                                </a>
                                             <!-- Supprimer -->
                                             <button type="button" 
                                                 onclick="confirmerSuppression(<?= $devis['code_devis'] ?>)"
@@ -377,6 +414,24 @@ if ($client_info['date_entree']) {
                                                 </svg>
                                                 Supprimer
                                             </button>
+                                            <!-- valider -->
+                                            <?php if ($devis['status_devis'] == 0): ?>
+                                                <form method="post" action="valider_devis.php" class="inline">
+                                                    <input type="hidden" name="code_devis" value="<?= $devis['code_devis'] ?>">
+                                                    <button  id="btnValiderDevis" type="submit"
+                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 dark:bg-green-900 dark:hover:bg-green-800"
+                                                        title="Valider le devis">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        Valider
+                                                    </button>
+                                                    <!-- <button id="btnValiderDevis" data-devis="<?= $code_devis ?>">Valider le devis</button> -->
+
+                                                </form>
+                                            <?php endif; ?>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -435,6 +490,30 @@ if ($client_info['date_entree']) {
         </div>
     </div>
 
+    <!-- Modal de confirmation validation -->
+    <div id="devisvalidationModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="text-center">
+                    <svg class="w-16 h-16 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Devis validé</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">
+                        Le devis #<span id="validatedDevisId"></span> a été validé avec succès et ne pourra plus être modifié.
+                    </p>
+                    <button type="button" onclick="fermerValidationModal()"
+                        class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
     <script>
     function confirmerSuppression(codeDevis) {
         document.getElementById('deleteDevisId').value = codeDevis;
@@ -451,6 +530,52 @@ if ($client_info['date_entree']) {
             fermerModal();
         }
     });
+    //recharger le devis
+document.getElementById('btnValiderDevis').addEventListener('click', function(e){
+    e.preventDefault(); // Empêche le submit classique du formulaire
+    const codeDevis = this.closest('form').querySelector('input[name="code_devis"]').value;
+
+    fetch('valider_devis.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'code_devis=' + codeDevis
+    })
+    .then(response => response.text())
+    .then(data => {
+        // Remplir l'ID dans le modal
+        document.getElementById('validatedDevisId').textContent = codeDevis;
+        // Afficher le modal
+        document.getElementById('devisvalidationModal').classList.remove('hidden');
+    })
+    .catch(err => alert("Erreur lors de la validation : " + err));
+});
+
+// Fonction de fermeture du modal de validation
+function fermerValidationModal() {
+    document.getElementById('devisvalidationModal').classList.add('hidden');
+}
+
+// Fermer le modal si clic en dehors
+document.getElementById('devisvalidationModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        fermerValidationModal();
+    }
+    const codeDevis = this.dataset.devis;
+
+    fetch('valider_devis.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'code_devis=' + codeDevis
+    })
+    .then(response => response.text())
+    .then(data => {
+        alert("Le devis a bien été validé !");
+        location.reload()
+       
+    })
+    .catch(err => alert("Erreur lors de la validation : " + err));
+});
+    
     </script>
 </body>
 

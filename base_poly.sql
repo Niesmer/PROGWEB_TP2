@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS Devis(
     date_devis DATE,
     montant_ht DECIMAL(10, 2),
     montant_ttc DECIMAL(10, 2),
+    status_devis INT NOT NULL DEFAULT 0,
     FOREIGN KEY (code_client) REFERENCES Clients(code_client)
 );
 
@@ -114,3 +115,4 @@ INSERT IGNORE INTO Articles (code_article, designation, code_unite, forfait_ht, 
 ('A1', 'Intervention à l''heure', 'H', 72, 1),
 ('A2', 'Intervention à la minute', 'M', 1.2, 2),
 ('A3', 'Intervention à la seconde', 'S', 0.02, 3);
+

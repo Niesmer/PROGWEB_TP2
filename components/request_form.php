@@ -32,6 +32,16 @@ if ($devis && isset($db_connection)) {
         $code_client = $devis_info['code_client'];
     }
 }
+//récupérer le status du devis
+if ($devis_info) {
+    // Traduire le statut en texte
+    $statusLabels = [
+        0 => 'En cours',
+        1 => 'Imprimé',
+        2 => 'Validé'
+    ];
+    $devis_info['statut_libelle'] = $statusLabels[$devis_info['status_devis']] ?? 'Inconnu';
+}
 
 if ($code_client && isset($db_connection)) {
     $stmt = $db_connection->prepare("
@@ -44,6 +54,7 @@ if ($code_client && isset($db_connection)) {
     $stmt->execute([':code_client' => $code_client]);
     $client_info = $stmt->fetch(PDO::FETCH_ASSOC);
 }
+// Récupérer le status de devis 
 
 // Récupérer tous les articles disponibles
 $articles = [];

@@ -18,6 +18,22 @@ $is_update = !empty($code_devis);
 try {
     // Start transaction
     $db_connection->beginTransaction();
+
+    //start_status cheking
+    if ($is_update) {
+    // Vérifier le statut du devis - bloqué la modif d'un devis validé
+    $stmt = $db_connection->prepare("
+        SELECT status_devis FROM Devis WHERE code_devis = :code_devis
+    ");
+    $stmt->execute([':code_devis' => $code_devis]);
+    $devis = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($devis && $devis['status_devis'] == 2) {
+        throw new Exception("Ce devis est validé et ne peut plus être modifié.");
+    }
+
+    }
+
     
     // Calculate totals
     $montant_ht_total = 0;
@@ -70,8 +86,8 @@ try {
     } else {
         // Insert new devis
         $stmt = $db_connection->prepare("
-            INSERT INTO Devis (code_client, date_devis, montant_ht, montant_ttc) 
-            VALUES (:code_client, CURDATE(), :montant_ht, :montant_ttc)
+            INSERT INTO Devis (code_client, date_devis, montant_ht, montant_ttc, status_devis) 
+            VALUES (:code_client, CURDATE(), :montant_ht, :montant_ttc, 0)
         ");
         $stmt->execute([
             ':code_client' => $code_client,

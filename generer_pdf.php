@@ -1,6 +1,7 @@
 <?php
 require_once 'Ressources_communes.php';
 
+$code_devis  = $_POST['code_devis'] ?? null;
 $code_client = $_POST['code_client'] ?? null;
 $lignes_json = $_POST['lignes_json'] ?? '[]';
 $lignes = json_decode($lignes_json, true);
@@ -36,6 +37,13 @@ foreach ($lignes as $ligne) {
 
 $totalTVA = array_sum($tvaMap);
 $totalTTC = $totalHT + $totalTVA;
+
+$stmt = $db_connection->prepare("
+    UPDATE Devis 
+    SET status_devis = 1 
+    WHERE code_devis = :code_devis AND status_devis < 2
+    ");
+$stmt->execute([':code_devis' => $code_devis]);
 ?>
 
 <!DOCTYPE html>
