@@ -91,48 +91,100 @@ $client_list_js = json_encode(array_map(function($c) {
 <body class="bg-gray-50 dark:bg-gray-900">
 <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
 
+<!-- Navbar Flowbite -->
+<?php include("./components/navbar.php") ?>
+
 <main class="min-h-screen py-8">
-<div class="max-w-7xl px-4 mx-auto">
+<div class="max-w-7xl px-4 mx-auto sm:px-6 lg:px-8">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-5" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+            <li class="inline-flex items-center">
+                <a href="./" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
+                    <svg class="w-3 h-3 me-2.5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+                    </svg>
+                    Accueil
+                </a>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none" viewBox="0 0 6 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                    </svg>
+                    <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2 dark:text-gray-400">Recherche Documents</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
     <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Recherche de documents</h1>
 
-    <!-- Formulaire de recherche -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+    <!-- Formulaire de recherche Flowbite -->
+    <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 mb-6">
         <form method="GET" class="space-y-4">
-            <div class="flex flex-col md:flex-row gap-4">
-                <input type="text" id="search_client" name="search_client" placeholder="Nom ou prénom client" 
-                       value="<?= htmlspecialchars($search_client) ?>"
-                       class="flex-1 p-3 rounded-lg border border-gray-300" list="client_suggestions" />
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <div>
+                    <label for="search_client" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Client</label>
+                    <input type="text" id="search_client" name="search_client" placeholder="Nom ou prénom" 
+                           value="<?= htmlspecialchars($search_client) ?>"
+                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" list="client_suggestions" />
+                    <datalist id="client_suggestions"></datalist>
+                </div>
 
-                <datalist id="client_suggestions"></datalist>
+                <div>
+                    <label for="search_file" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Document</label>
+                    <input type="text" id="search_file" name="search_file" placeholder="Nom du fichier" 
+                           value="<?= htmlspecialchars($search_file) ?>"
+                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+                </div>
 
-                <input type="text" name="search_file" placeholder="Nom du document" 
-                       value="<?= htmlspecialchars($search_file) ?>"
-                       class="flex-1 p-3 rounded-lg border border-gray-300" />
+                <div>
+                    <label for="type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type</label>
+                    <input type="text" id="type" name="type" placeholder="Type de fichier" 
+                           value="<?= htmlspecialchars($filter_type) ?>"
+                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+                </div>
 
-                <input type="text" name="type" placeholder="Type de fichier" 
-                       value="<?= htmlspecialchars($filter_type) ?>"
-                       class="p-3 rounded-lg border border-gray-300" />
+                <div>
+                    <label for="nature" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nature</label>
+                    <select id="nature" name="nature" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        <option value="">Toutes</option>
+                        <?php foreach ($natures_docs as $nature): ?>
+                            <option value="<?= $nature ?>" <?= $filter_nature == $nature ? 'selected' : '' ?>><?= htmlspecialchars($nature) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
-                <select name="nature" class="p-3 rounded-lg border border-gray-300">
-                    <option value="">Nature       </option>
-                    <?php foreach ($natures_docs as $nature): ?>
-                        <option value="<?= $nature ?>" <?= $filter_nature == $nature ? 'selected' : '' ?>><?= htmlspecialchars($nature) ?></option>
-                    <?php endforeach; ?>
-                </select>
-
-                <input type="date" name="upload_date" value="<?= htmlspecialchars($filter_upload_date) ?>" class="p-3 rounded-lg border border-gray-300" />
-
-                <button type="submit" class="px-5 py-3 bg-primary-600 text-white rounded-lg">Rechercher</button>
+                <div>
+                    <label for="upload_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date d'upload</label>
+                    <input type="date" id="upload_date" name="upload_date" value="<?= htmlspecialchars($filter_upload_date) ?>" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+                </div>
+            </div>
+            
+            <div class="flex justify-end">
+                <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    <svg class="w-4 h-4 me-2" aria-hidden="true" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                    </svg>
+                    Rechercher
+                </button>
             </div>
         </form>
     </div>
 
-    <!-- Résultats -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Résultats (<?= count($documents) ?> document<?= count($documents) > 1 ? 's' : '' ?>)
-            </h2>
+    <!-- Résultats Table Flowbite -->
+    <div class="relative overflow-hidden bg-white shadow-md dark:bg-gray-800 sm:rounded-lg">
+        <div class="flex flex-col px-4 py-3 space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 lg:space-x-4">
+            <div class="flex items-center flex-1 space-x-4">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Résultats</h2>
+                <span class="bg-gray-100 text-gray-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+                    <svg class="w-2.5 h-2.5 me-1.5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z"/>
+                    </svg>
+                    <?= count($documents) ?> trouvé<?= count($documents) > 1 ? 's' : '' ?>
+                </span>
+            </div>
         </div>
 
         <?php if (count($documents) > 0): ?>
@@ -152,17 +204,25 @@ $client_list_js = json_encode(array_map(function($c) {
                 </thead>
                 <tbody>
                     <?php foreach ($documents as $doc): ?>
-                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <td class="px-6 py-4"><?= htmlspecialchars($doc['file_name']) ?></td>
-                        <td class="px-6 py-4"><?= htmlspecialchars($doc['nom'] . ' ' . $doc['prenom']) ?></td>
-                        <td class="px-6 py-4"><?= htmlspecialchars($doc['file_nature']) ?></td>
-                        <td class="px-6 py-4"><?= htmlspecialchars($doc['file_type']) ?></td>
-                        <td class="px-6 py-4"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($doc['upload_date']))) ?></td>
-                        <td class="px-6 py-4"><?= round($doc['file_size']/1024, 2) ?></td>
-                        <td class="px-6 py-4"><?= $doc['code_devis'] ?? '-' ?></td>
-                        <td class="px-6 py-4 space-x-2">
-                            <a href="<?= htmlspecialchars($doc['file_path']) ?>" target="_blank" class="text-blue-600">Ouvrir</a>
-                            <a href="<?= htmlspecialchars($doc['file_path']) ?>" download class="text-green-600">Télécharger</a>
+                    <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"><?= htmlspecialchars($doc['file_name']) ?></th>
+                        <td class="px-4 py-3"><?= htmlspecialchars($doc['nom'] . ' ' . $doc['prenom']) ?></td>
+                        <td class="px-4 py-3">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+                                <?= htmlspecialchars($doc['file_nature']) ?>
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-purple-900 dark:text-purple-300">
+                                <?= htmlspecialchars($doc['file_type']) ?>
+                            </span>
+                        </td>
+                        <td class="px-4 py-3"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($doc['upload_date']))) ?></td>
+                        <td class="px-4 py-3"><?= round($doc['file_size']/1024, 2) ?> Ko</td>
+                        <td class="px-4 py-3"><?= $doc['code_devis'] ? '<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-green-900 dark:text-green-300">#' . $doc['code_devis'] . '</span>' : '-' ?></td>
+                        <td class="px-4 py-3 flex items-center gap-2">
+                            <a href="<?= htmlspecialchars($doc['file_path']) ?>" target="_blank" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Ouvrir</a>
+                            <a href="<?= htmlspecialchars($doc['file_path']) ?>" download class="font-medium text-green-600 dark:text-green-500 hover:underline">Télécharger</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -170,8 +230,12 @@ $client_list_js = json_encode(array_map(function($c) {
             </table>
         </div>
         <?php else: ?>
-            <div class="px-6 py-12 text-center">
-                <p class="text-gray-500">Aucun document trouvé. Essayez de modifier vos critères de recherche.</p>
+            <div class="flex flex-col items-center justify-center p-12">
+                <svg class="w-20 h-20 text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Aucun document trouvé</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Essayez de modifier vos critères de recherche.</p>
             </div>
         <?php endif; ?>
     </div>

@@ -27,7 +27,7 @@ if ($devis && isset($db_connection)) {
         $stmt->execute([':code_devis' => $devis]);
         $lignes_devis = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $devis_info['lignes'] = $lignes_devis;
-        
+
         // Use the client from the devis
         $code_client = $devis_info['code_client'];
     }
@@ -69,51 +69,138 @@ if (isset($db_connection)) {
 }
 ?>
 
-<section class="bg-white min-h-full dark:bg-gray-900 py-8">
-    <div class="max-w-6xl mx-auto px-4">
+<section class="bg-gray-50 min-h-full dark:bg-gray-900 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <nav class="flex mb-5" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+                <li class="inline-flex items-center">
+                    <a href="./"
+                        class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
+                        <svg class="w-3 h-3 me-2.5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
+                        </svg>
+                        Accueil
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none"
+                            viewBox="0 0 6 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 9 4-4-4-4" />
+                        </svg>
+                        <a href="fiche_client.php?client=<?= urlencode($code_client ?? '') ?>"
+                            class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white">Fiche
+                            Client</a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true" fill="none"
+                            viewBox="0 0 6 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 9 4-4-4-4" />
+                        </svg>
+                        <span
+                            class="ms-1 text-sm font-medium text-gray-500 md:ms-2 dark:text-gray-400"><?= $devis_info ? 'Édition Devis' : 'Nouveau Devis' ?></span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
         <!-- En-tête du devis -->
-        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
+        <div
+            class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 mb-6">
             <div class="flex justify-between items-start">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        <?= $devis_info ? 'Édition Devis SAV #' . htmlspecialchars($devis) : 'Nouveau Devis SAV' ?>
+                    <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
+                        <?= $devis_info ? 'Édition Devis SAV' : 'Nouveau Devis SAV' ?>
+                        <?php if ($devis_info): ?>
+                            <span
+                                class="text-2xl font-normal text-gray-500 dark:text-gray-400">#<?= htmlspecialchars($devis) ?></span>
+                        <?php endif; ?>
                     </h1>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">Date: <?= date('d/m/Y') ?></p>
+                    <div class="flex items-center gap-3 mt-2">
+                        <p class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                            <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Date: <?= date('d/m/Y') ?>
+                        </p>
+                        <?php if ($devis_info): ?>
+                            <?php
+                            $badgeColors = [
+                                'En cours' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+                                'Imprimé' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+                                'Validé' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                            ];
+                            $statusColor = $badgeColors[$devis_info['statut_libelle']] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                            ?>
+                            <span class="<?= $statusColor ?> text-xs font-medium px-2.5 py-0.5 rounded">
+                                <?= htmlspecialchars($devis_info['statut_libelle']) ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <div class="text-right">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">POLY Industrie</h2>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">POLY Industrie</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Service Après-Vente</p>
                 </div>
             </div>
         </div>
 
         <!-- Informations client -->
         <?php if ($client_info): ?>
-            <div class="bg-blue-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Client</h3>
-                <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <span class="text-gray-600 dark:text-gray-400">Nom:</span>
-                        <span class="font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($client_info['nom'] . ' ' . $client_info['prenom']) ?></span>
+            <div class="p-6 bg-blue-50 border border-blue-200 rounded-lg dark:bg-gray-800 dark:border-blue-800 mb-6">
+                <div class="flex items-center mb-3">
+                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 me-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Informations Client</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="flex items-center">
+                        <span class="text-gray-600 dark:text-gray-400 w-32">Nom:</span>
+                        <span
+                            class="font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($client_info['nom'] . ' ' . $client_info['prenom']) ?></span>
                     </div>
-                    <div>
-                        <span class="text-gray-600 dark:text-gray-400">Forme Juridique:</span>
-                        <span class="font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($client_info['forme_libelle'] ?? '-') ?></span>
+                    <div class="flex items-center">
+                        <span class="text-gray-600 dark:text-gray-400 w-32">Forme Juridique:</span>
+                        <span
+                            class="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-purple-900 dark:text-purple-300">
+                            <?= htmlspecialchars($client_info['forme_libelle'] ?? '-') ?>
+                        </span>
                     </div>
-                    <div>
-                        <span class="text-gray-600 dark:text-gray-400">Pays:</span>
-                        <span class="font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($client_info['pays_libelle'] ?? '-') ?></span>
+                    <div class="flex items-center">
+                        <span class="text-gray-600 dark:text-gray-400 w-32">Pays:</span>
+                        <span
+                            class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                            <?= htmlspecialchars($client_info['pays_libelle'] ?? '-') ?>
+                        </span>
                     </div>
-                    <div>
-                        <span class="text-gray-600 dark:text-gray-400">N° Sécurité Sociale:</span>
-                        <span class="font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($client_info['num_sec_soc'] ?? '-') ?></span>
+                    <div class="flex items-center">
+                        <span class="text-gray-600 dark:text-gray-400 w-32">N° Sécurité Sociale:</span>
+                        <span
+                            class="font-mono text-gray-900 dark:text-white"><?= htmlspecialchars($client_info['num_sec_soc'] ?? '-') ?></span>
                     </div>
                 </div>
             </div>
         <?php else: ?>
-            <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 mb-6">
-                <p class="text-yellow-800 dark:text-yellow-200">
-                    <a href="recherche_client.php" class="underline hover:text-yellow-600">Veuillez d'abord sélectionner un client</a>
-                </p>
+            <div class="flex items-center p-4 mb-4 text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300"
+                role="alert">
+                <svg class="flex-shrink-0 w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                </svg>
+                <span class="sr-only">Info</span>
+                <div class="ms-3 text-sm font-medium">
+                    <a href="./" class="font-semibold underline hover:no-underline">Veuillez d'abord sélectionner un
+                        client</a>
+                </div>
             </div>
         <?php endif; ?>
 
@@ -125,11 +212,21 @@ if (isset($db_connection)) {
             <?php endif; ?>
 
             <!-- Zone d'ajout d'article -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ajouter un article</h3>
-                <div class="flex gap-4 items-end flex-wrap">
-                    <div class="flex-1 min-w-[200px]">
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Code Article</label>
+            <div
+                class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 mb-6">
+                <div class="flex items-center mb-4">
+                    <svg class="w-5 h-5 text-primary-600 dark:text-primary-400 me-2" fill="currentColor"
+                        viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ajouter un article</h3>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 items-end">
+                    <div class="lg:col-span-2">
+                        <label for="searchArticle"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Code Article</label>
                         <div class="relative">
                             <input type="text" id="searchArticle"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -152,7 +249,8 @@ if (isset($db_connection)) {
                                         data-forfait="<?= htmlspecialchars($article['forfait_ht']) ?>"
                                         data-tva="<?= htmlspecialchars($article['tva_taux']) ?>">
                                         <div class="font-medium text-gray-900 dark:text-white">
-                                            <?= htmlspecialchars($article['code_article']) ?> - <?= htmlspecialchars($article['designation']) ?>
+                                            <?= htmlspecialchars($article['code_article']) ?> -
+                                            <?= htmlspecialchars($article['designation']) ?>
                                         </div>
                                         <div class="text-sm text-gray-500 dark:text-gray-400">
                                             Forfait: <?= number_format($article['forfait_ht'], 2, ',', ' ') ?> € HT /
@@ -164,21 +262,24 @@ if (isset($db_connection)) {
                             </div>
                         </div>
                     </div>
-                    <div class="w-32">
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantité</label>
+                    <div>
+                        <label for="quantite"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantité</label>
                         <input type="number" id="quantite" min="0.01" step="0.01" value="1"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     </div>
-                    <div class="w-32">
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Unité</label>
+                    <div>
+                        <label for="unite"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Unité</label>
                         <input type="text" id="unite" readonly
-                            class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-600 dark:text-white">
+                            class="bg-gray-100 border border-gray-300 text-gray-500 text-sm rounded-lg block w-full p-2.5 cursor-not-allowed dark:bg-gray-600 dark:border-gray-600 dark:text-gray-400">
                     </div>
                     <div>
                         <button type="button" id="btnAddLine"
-                            class="px-5 py-2.5 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700">
-                            <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center inline-flex items-center justify-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4" />
                             </svg>
                             Ajouter
                         </button>
@@ -192,30 +293,39 @@ if (isset($db_connection)) {
             </div>
 
             <!-- Tableau des lignes du devis -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
-                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
-                            <th class="px-4 py-3">Code</th>
-                            <th class="px-4 py-3">Désignation</th>
-                            <th class="px-4 py-3 text-center">Quantité</th>
-                            <th class="px-4 py-3 text-center">Unité</th>
-                            <th class="px-4 py-3 text-right">Prix Unit. HT</th>
-                            <th class="px-4 py-3 text-right">TVA %</th>
-                            <th class="px-4 py-3 text-right">Montant HT</th>
-                            <th class="px-4 py-3 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lignesDevis">
-                        <?php if (!$devis_info || empty($devis_info['lignes'])): ?>
-                            <tr id="emptyRow">
-                                <td colspan="8" class="px-4 py-8 text-center text-gray-400">
-                                    Aucun article ajouté. Utilisez la recherche ci-dessus pour ajouter des articles.
-                                </td>
+            <div class="relative overflow-hidden bg-white shadow-md dark:bg-gray-800 sm:rounded-lg mb-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th class="px-4 py-3">Code</th>
+                                <th class="px-4 py-3">Désignation</th>
+                                <th class="px-4 py-3 text-center">Quantité</th>
+                                <th class="px-4 py-3 text-center">Unité</th>
+                                <th class="px-4 py-3 text-right">Prix Unit. HT</th>
+                                <th class="px-4 py-3 text-right">TVA %</th>
+                                <th class="px-4 py-3 text-right">Montant HT</th>
+                                <th class="px-4 py-3 text-center">Actions</th>
                             </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody id="lignesDevis">
+                            <?php if (!$devis_info || empty($devis_info['lignes'])): ?>
+                                <tr id="emptyRow">
+                                    <td colspan="8" class="px-4 py-12 text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                        </svg>
+                                        <p class="text-gray-500 dark:text-gray-400">Aucun article ajouté</p>
+                                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Utilisez la recherche
+                                            ci-dessus pour ajouter des articles</p>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Totaux -->
@@ -249,22 +359,31 @@ if (isset($db_connection)) {
             </div>
 
             <!-- Boutons d'action -->
-            <div class="flex justify-between mt-6">
+            <div class="flex flex-col sm:flex-row justify-between gap-3 mt-6">
                 <a href="fiche_client.php?client=<?= urlencode($code_client ?? '') ?>"
-                    class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700">
-                    ← Retour
+                    class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 inline-flex items-center justify-center">
+                    <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Retour
                 </a>
-                <div class="flex gap-3">
-                    <button type="button" id="btnPrintPDF"
-                        class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700">
-                        <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                        Imprimer PDF
-                    </button>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <?php if (isset($devis_info)): ?>
+                        <button type="button" id="btnPrintPDF"
+                            class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 inline-flex items-center justify-center">
+                            <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            Imprimer PDF
+                        </button>
+                    <?php endif; ?>
                     <button type="submit"
-                        class="px-5 py-2.5 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700">
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
                         <?= $devis_info ? 'Mettre à jour' : 'Enregistrer' ?> le devis
                     </button>
                 </div>
@@ -281,24 +400,24 @@ if (isset($db_connection)) {
 
     // Charger les lignes existantes si on est en mode édition
     <?php if ($devis_info && !empty($devis_info['lignes'])): ?>
-    const lignesExistantes = <?= json_encode($devis_info['lignes']) ?>;
-    lignesExistantes.forEach((ligne, idx) => {
-        lignesDevis.push({
-            index: idx,
-            code: ligne.code_article,
-            designation: ligne.designation,
-            quantite: parseFloat(ligne.quantite),
-            unite: ligne.unite_libelle,
-            forfait: parseFloat(ligne.forfait_ht),
-            tva: parseFloat(ligne.tva_taux),
-            montantHT: parseFloat(ligne.quantite) * parseFloat(ligne.forfait_ht)
+        const lignesExistantes = <?= json_encode($devis_info['lignes']) ?>;
+        lignesExistantes.forEach((ligne, idx) => {
+            lignesDevis.push({
+                index: idx,
+                code: ligne.code_article,
+                designation: ligne.designation,
+                quantite: parseFloat(ligne.quantite),
+                unite: ligne.unite_libelle,
+                forfait: parseFloat(ligne.forfait_ht),
+                tva: parseFloat(ligne.tva_taux),
+                montantHT: parseFloat(ligne.quantite) * parseFloat(ligne.forfait_ht)
+            });
+
+            ajouterLigneDOM(idx, ligne.code_article, ligne.designation, parseFloat(ligne.quantite),
+                ligne.unite_libelle, parseFloat(ligne.forfait_ht), parseFloat(ligne.tva_taux));
+            ligneIndex = idx + 1;
         });
-        
-        ajouterLigneDOM(idx, ligne.code_article, ligne.designation, parseFloat(ligne.quantite), 
-                        ligne.unite_libelle, parseFloat(ligne.forfait_ht), parseFloat(ligne.tva_taux));
-        ligneIndex = idx + 1;
-    });
-    calculerTotaux();
+        calculerTotaux();
     <?php endif; ?>
 
     // Gestion de la recherche d'articles
@@ -328,7 +447,7 @@ if (isset($db_connection)) {
         filterArticles(searchInput.value);
         toggleDropdown(true);
     });
-    
+
     searchInput.addEventListener('input', (e) => {
         filterArticles(e.target.value);
         toggleDropdown(true);
@@ -357,7 +476,7 @@ if (isset($db_connection)) {
 
     function ajouterLigneDOM(index, code, designation, quantite, unite, forfait, tva) {
         const montantHT = quantite * forfait;
-        
+
         // Supprimer la ligne vide si présente
         const emptyRow = document.getElementById('emptyRow');
         if (emptyRow) emptyRow.remove();
@@ -399,7 +518,7 @@ if (isset($db_connection)) {
         // Ajouter l'événement de changement de quantité
         const qtyInput = document.getElementById('quantite-' + index);
         const hiddenQty = tr.querySelector(`input[name="lignes[${index}][quantite]"]`);
-        
+
         qtyInput.addEventListener('input', (e) => {
             const newQuantite = parseFloat(e.target.value);
             if (newQuantite > 0) {
@@ -408,7 +527,7 @@ if (isset($db_connection)) {
                     ligne.quantite = newQuantite;
                     ligne.montantHT = newQuantite * ligne.forfait;
                     hiddenQty.value = newQuantite.toFixed(2);
-                    document.getElementById('montantHT-' + index).textContent = 
+                    document.getElementById('montantHT-' + index).textContent =
                         ligne.montantHT.toFixed(2).replace('.', ',') + ' €';
                     calculerTotaux();
                 }
