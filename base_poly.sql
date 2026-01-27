@@ -68,19 +68,13 @@ CREATE TABLE IF NOT EXISTS Lignes_Devis(
     FOREIGN KEY (code_article) REFERENCES Articles(code_article)
 );
 
-CREATE TABLE DevisDocs (
-    code_devis INT PRIMARY KEY,
-    chemin_fichier VARCHAR(255) NOT NULL,
-    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (code_devis) REFERENCES Devis(code_devis)
-);
-
 CREATE TABLE IF NOT EXISTS Files(
     id_file INT PRIMARY KEY AUTO_INCREMENT,
     file_name VARCHAR(255),
     file_path VARCHAR(255),
+    file_type VARCHAR(255), -- pdf/ image ect
+    file_nature VARCHAR(255), -- cni, devis, contrat ect
     upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    mime_type VARCHAR(100),
     file_size INT,
     code_devis INT,
     code_client INT,

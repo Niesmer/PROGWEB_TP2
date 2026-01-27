@@ -136,7 +136,7 @@ $clients = $query->fetchAll(PDO::FETCH_ASSOC);
             </div>
             
             <div class="flex justify-end mb-4">
-               <a href="recherche_devis.php"
+               <a href="upload_docs.php"
                 class="inline-flex items-center px-5 py-3 text-sm font-medium text-white 
                         bg-primary-600 rounded-lg hover:bg-primary-700 
                         focus:ring-4 focus:ring-primary-300">
@@ -145,8 +145,7 @@ $clients = $query->fetchAll(PDO::FETCH_ASSOC);
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-
-                    Devis
+                    GED
                 </a>
             </div>
 
