@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS Devis(
     date_devis DATE,
     montant_ht DECIMAL(10, 2),
     montant_ttc DECIMAL(10, 2),
+    status_devis INT NOT NULL DEFAULT 0,
     FOREIGN KEY (code_client) REFERENCES Clients(code_client)
 );
 
@@ -72,14 +73,16 @@ CREATE TABLE IF NOT EXISTS Files(
     id_file INT PRIMARY KEY AUTO_INCREMENT,
     file_name VARCHAR(255),
     file_path VARCHAR(255),
+    file_type VARCHAR(255), -- pdf/ image ect
+    file_nature VARCHAR(255), -- cni, devis, contrat ect
     upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    mime_type VARCHAR(100),
     file_size INT,
     code_devis INT,
     code_client INT,
     FOREIGN KEY (code_devis) REFERENCES Devis(code_devis),
     FOREIGN KEY (code_client) REFERENCES Clients(code_client)
 );
+
 
 INSERT IGNORE INTO Pays (code_pays, libelle) VALUES
 ('FR', 'France'),
@@ -128,3 +131,4 @@ INSERT IGNORE INTO Articles (code_article, designation, code_unite, forfait_ht, 
 ('A1', 'Intervention à l''heure', 'H', 72, 1),
 ('A2', 'Intervention à la minute', 'M', 1.2, 2),
 ('A3', 'Intervention à la seconde', 'S', 0.02, 3);
+

@@ -50,6 +50,7 @@ function InitDB()
         $db_connection = connectDB("user1", "hcetylop", "poly_php");
         $statements = explode(';', $sql);
         foreach ($statements as $statement) {
+            $statement = trim($statement);
             if (!empty($statement)) {
                 $db_connection->exec($statement);
             }

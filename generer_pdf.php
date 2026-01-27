@@ -1,6 +1,7 @@
 <?php
 require_once 'Ressources_communes.php';
 
+$code_devis  = $_POST['code_devis'] ?? null;
 $code_client = $_POST['code_client'] ?? null;
 $lignes_json = $_POST['lignes_json'] ?? '[]';
 $lignes = json_decode($lignes_json, true);
