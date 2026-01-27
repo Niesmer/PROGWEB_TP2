@@ -1,4 +1,24 @@
 <?php
+require_once 'vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+// Source - https://stackoverflow.com/a
+// Posted by Kareem, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-01-27, License - CC BY-SA 4.0
+
+$env = file_get_contents(__DIR__ . "/.env");
+$lines = explode("\n", $env);
+
+foreach ($lines as $line) {
+    preg_match("/([^#]+)\=(.*)/", $line, $matches);
+    if (isset($matches[2])) {
+        putenv(trim($line));
+    }
+}
+
 function connectDB($username, $password, $dbname = ""): PDO
 {
     try {
@@ -29,6 +49,32 @@ function InitDB()
         }
     } catch (PDOException $e) {
         die($e->getMessage());
+    }
+}
+
+function sendEmail($to, $subject, $body, $attachments = [])
+{
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = getenv('SMTP_SERVER');
+        $mail->SMTPAuth = true;
+        $mail->Username = getenv('SMTP_USERNAME');
+        $mail->Password = getenv('SMTP_PASSWORD');
+        $mail->Port = getenv('SMTP_PORT');
+        $mail->setFrom('address@mail.com', 'Your Name');
+        $mail->addAddress($to);
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body = $body;
+
+        foreach ($attachments as $attachment) {
+            $mail->addAttachment($attachment);
+        }
+
+        $mail->send();
+    } catch (Exception $e) {
+        echo "Le message n'a pas pu être envoyé. Erreur de Mailer: {$mail->ErrorInfo}";
     }
 }
 InitDB();
