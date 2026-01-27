@@ -223,6 +223,7 @@ $client_list_js = json_encode(array_map(function($c) {
                         <td class="px-4 py-3 flex items-center gap-2">
                             <a href="<?= htmlspecialchars($doc['file_path']) ?>" target="_blank" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Ouvrir</a>
                             <a href="<?= htmlspecialchars($doc['file_path']) ?>" download class="font-medium text-green-600 dark:text-green-500 hover:underline">Télécharger</a>
+                            <button onclick="confirmerSuppressionFichier(<?= $doc['id_file'] ?>)" class="font-medium text-red-600 dark:text-red-500 hover:underline">Supprimer</button>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -242,7 +243,26 @@ $client_list_js = json_encode(array_map(function($c) {
 </div>
 </main>
 
+<!-- Modal de suppression de fichier -->
+<?php
+$modal_id = 'modalSuppressionFichier';
+$title = 'Êtes-vous sûr de vouloir supprimer ce fichier ?';
+$message = '';
+$form_action = 'supprimer_fichier.php';
+$hidden_inputs = ['id_file' => 'idFichierASupprimer'];
+$submit_label = 'Supprimer définitivement';
+$submit_color = 'red';
+include './components/modal_confirmation.php';
+?>
+
 <script>
+    function confirmerSuppressionFichier(idFile) {
+        document.getElementById('idFichierASupprimer').value = idFile;
+        const modal = document.getElementById('modalSuppressionFichier');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
     // Remplissage de la datalist pour autocomplétion
     const clients = <?= $client_list_js ?>;
     const dataList = document.getElementById('client_suggestions');

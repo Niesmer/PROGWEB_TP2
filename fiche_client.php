@@ -290,7 +290,7 @@ if ($client_info['date_entree']) {
                                     </p>
                                 </div>
                             </div>
-                            <div class="flex items-center">
+                            <div class="flex items-center gap-3">
                                 <a href="devis_client.php?client=<?= $client_info['code_client'] ?>"
                                     class="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 transition-colors">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -299,6 +299,13 @@ if ($client_info['date_entree']) {
                                     </svg>
                                     Créer un nouveau devis
                                 </a>
+                                <button onclick="ouvrirModalSuppressionClient(<?= $code_client ?>, '<?= htmlspecialchars($client_info['nom']) ?>', '<?= htmlspecialchars($client_info['prenom']) ?>')" 
+                                    class="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 transition-colors">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Supprimer le client
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -687,39 +694,19 @@ if ($client_info['date_entree']) {
         </section>
     </main>
 
-    <!-- Modal de confirmation de suppression -->
-    <div id="deleteModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-                <div class="text-center">
-                    <svg class="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Confirmer la suppression</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">
-                        Êtes-vous sûr de vouloir supprimer ce devis ? Cette action est irréversible.
-                    </p>
-                    <div class="flex justify-center gap-3">
-                        <button type="button" onclick="fermerModal()"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
-                            Annuler
-                        </button>
-                        <form id="deleteForm" method="POST" action="supprimer_devis.php" class="inline">
-                            <input type="hidden" name="code_devis" id="deleteDevisId" value="">
-                            <input type="hidden" name="code_client" value="<?= $code_client ?>">
-                            <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                                Supprimer
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Modal de suppression de devis -->
+    <?php
+    $modal_id = 'deleteModal';
+    $title = 'Êtes-vous sûr de vouloir supprimer le devis <strong id="numeroDevisASupprimer"></strong> ?';
+    $message = '';
+    $form_action = 'supprimer_devis.php';
+    $hidden_inputs = ['code_devis' => 'deleteDevisId', 'code_client' => 'deleteClientId'];
+    $submit_label = 'Supprimer définitivement';
+    $submit_color = 'red';
+    include './components/modal_confirmation.php';
+    ?>
+
+    <input type="hidden" id="deleteClientId" value="<?= $code_client ?>">
 
     <!-- Modal d'envoi d'email -->
     <div id="emailModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
@@ -832,11 +819,17 @@ L'équipe POLY Industrie</textarea>
     });
         function confirmerSuppression(codeDevis) {
             document.getElementById('deleteDevisId').value = codeDevis;
-            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('deleteClientId').value = <?= $code_client ?>;
+            document.getElementById('numeroDevisASupprimer').textContent = '#' + codeDevis;
+            const modal = document.getElementById('deleteModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
 
         function fermerModal() {
-            document.getElementById('deleteModal').classList.add('hidden');
+            const modal = document.getElementById('deleteModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
 
         // Fermer le modal en cliquant à l'extérieur
@@ -891,6 +884,37 @@ L'équipe POLY Industrie</textarea>
                 .catch(err => alert("Erreur lors de la validation : " + err));
         });
 
+    </script>
+
+    <!-- Modal de confirmation de suppression client -->
+    <?php
+    $modal_id = 'modalSuppressionClient';
+    include './components/modal_client_deletion.php';
+    ?>
+
+    <script>
+        function ouvrirModalSuppressionClient(codeClient, nom, prenom) {
+            document.getElementById('codeClientASupprimer').value = codeClient;
+            document.getElementById('nomClientASupprimer').textContent = nom + ' ' + prenom;
+            const modal = document.getElementById('modalSuppressionClient');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function confirmerSuppression(codeDevis) {
+            document.getElementById('deleteDevisId').value = codeDevis;
+            document.getElementById('deleteClientId').value = <?= $code_client ?>;
+            document.getElementById('numeroDevisASupprimer').textContent = '#' + codeDevis;
+            const modal = document.getElementById('deleteModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function fermerModal() {
+            const modal = document.getElementById('deleteModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     </script>
 </body>
 

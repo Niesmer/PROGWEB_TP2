@@ -75,7 +75,7 @@ $sql_clients = "
     LEFT JOIN Pays p ON c.code_pays = p.code_pays
     LEFT JOIN Motifs m ON c.code_motif = m.code_motif
     LEFT JOIN Formes_Juridiques f ON c.code_forme = f.code_forme
-    WHERE 1=1
+    WHERE deleted_at IS NULL
 ";
 
 $params = [];
@@ -448,6 +448,7 @@ $clients = $query->fetchAll(PDO::FETCH_ASSOC);
                                     <th scope="col" class="px-4 py-3">Pays</th>
                                     <th scope="col" class="px-4 py-3">Date d'entrée</th>
                                     <th scope="col" class="px-4 py-3">Motif</th>
+                                    <th scope="col" class="px-4 py-3">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -494,6 +495,15 @@ $clients = $query->fetchAll(PDO::FETCH_ASSOC);
                                                 <span class="text-gray-400">-</span>
                                             <?php endif; ?>
                                         </td>
+                                        <td class="px-4 py-3" onclick="event.stopPropagation()">
+                                            <button onclick="ouvrirModalSuppressionClient(<?= $client['code_client'] ?>, '<?= htmlspecialchars($client['nom']) ?>', '<?= htmlspecialchars($client['prenom']) ?>')" 
+                                                class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Supprimer
+                                            </button>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -524,6 +534,22 @@ $clients = $query->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
     </main>
+
+    <!-- Modal de confirmation de suppression client -->
+    <?php
+    $modal_id = 'modalSuppressionClient';
+    include './components/modal_client_deletion.php';
+    ?>
+
+    <script>
+        function ouvrirModalSuppressionClient(codeClient, nom, prenom) {
+            document.getElementById('codeClientASupprimer').value = codeClient;
+            document.getElementById('nomClientASupprimer').textContent = nom + ' ' + prenom;
+            const modal = document.getElementById('modalSuppressionClient');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    </script>
 </body>
 
 </html>

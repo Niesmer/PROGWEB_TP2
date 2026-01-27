@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS Clients (
     code_pays CHAR(2),
     date_entree DATE,
     code_motif INT,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (code_forme) REFERENCES Formes_Juridiques(code_forme),
     FOREIGN KEY (code_pays) REFERENCES Pays(code_pays),
     FOREIGN KEY (code_motif) REFERENCES Motifs(code_motif)
