@@ -19,6 +19,13 @@ foreach ($lines as $line) {
     }
 }
 
+enum DEVIS_STATUS : int {
+    case ONGOING = 0;
+    case PRINTED = 1;
+    case ACCEPTED = 2;
+    case REJECTED = 3;
+}
+
 function connectDB($username, $password, $dbname = ""): PDO
 {
     try {

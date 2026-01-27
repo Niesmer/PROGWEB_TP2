@@ -14,6 +14,7 @@ $code_client = intval($_POST['code_client']);
 $code_devis = isset($_POST['code_devis']) ? intval($_POST['code_devis']) : null;
 $lignes = $_POST['lignes'];
 $is_update = !empty($code_devis);
+$status_devis = intval($_POST['status_devis'] ?? DEVIS_STATUS::ONGOING->value);
 
 try {
     // Start transaction
@@ -55,13 +56,14 @@ try {
         // Update existing devis
         $stmt = $db_connection->prepare("
             UPDATE Devis 
-            SET montant_ht = :montant_ht, montant_ttc = :montant_ttc 
+            SET montant_ht = :montant_ht, montant_ttc = :montant_ttc, status_devis = :status_devis
             WHERE code_devis = :code_devis
         ");
         $stmt->execute([
             ':montant_ht' => $montant_ht_total,
             ':montant_ttc' => $montant_ttc_total,
-            ':code_devis' => $code_devis
+            ':code_devis' => $code_devis,
+            ':status_devis' => $status_devis
         ]);
         
         // Delete existing lines
@@ -70,13 +72,14 @@ try {
     } else {
         // Insert new devis
         $stmt = $db_connection->prepare("
-            INSERT INTO Devis (code_client, date_devis, montant_ht, montant_ttc) 
-            VALUES (:code_client, CURDATE(), :montant_ht, :montant_ttc)
+            INSERT INTO Devis (code_client, date_devis, montant_ht, montant_ttc, status_devis) 
+            VALUES (:code_client, CURDATE(), :montant_ht, :montant_ttc, :status_devis)
         ");
         $stmt->execute([
             ':code_client' => $code_client,
             ':montant_ht' => $montant_ht_total,
-            ':montant_ttc' => $montant_ttc_total
+            ':montant_ttc' => $montant_ttc_total,
+            ':status_devis' => $status_devis
         ]);
         
         $code_devis = $db_connection->lastInsertId();

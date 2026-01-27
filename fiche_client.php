@@ -331,6 +331,7 @@ if ($client_info['date_entree']) {
                                     <th class="px-4 py-3 text-center">Lignes</th>
                                     <th class="px-4 py-3 text-right">Montant HT</th>
                                     <th class="px-4 py-3 text-right">Montant TTC</th>
+                                    <th class="px-4 py-3">Status</th>
                                     <th class="px-4 py-3 text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -353,6 +354,34 @@ if ($client_info['date_entree']) {
                                     </td>
                                     <td class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">
                                         <?= number_format($devis['montant_ttc'], 2, ',', ' ') ?> €
+                                    </td>
+                                    <td>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm <?php
+                                            $status = $devis['status_devis'];
+                                            if ($status === DEVIS_STATUS::ONGOING->value) {
+                                                echo 'bg-yellow-100 text-yellow-800 dark:text-yellow-200 dark:bg-yellow-900 ';
+                                            } elseif ($status === DEVIS_STATUS::PRINTED->value) {
+                                                echo 'bg-blue-100 text-blue-800 dark:text-blue-200 dark:bg-blue-900';
+                                            }
+                                            
+                                            elseif ($status === DEVIS_STATUS::ACCEPTED->value) {
+                                                echo 'bg-green-100 dark:text-green-200 text-green-800 dark:bg-green-900';
+                                            } elseif ($status === DEVIS_STATUS::REJECTED->value) {
+                                                echo 'bg-red-100 dark:text-red-200 text-red-800 dark:bg-red-900';
+                                            } else {
+                                                echo 'bg-gray-100 dark:text-gray-200 text-gray-800 dark:bg-gray-900';
+                                            }
+                                        ?>">
+                                            <?php
+                                                $statusLabels = [
+                                                    DEVIS_STATUS::ONGOING->value => 'En cours',
+                                                    DEVIS_STATUS::PRINTED->value => 'Imprimé',
+                                                    DEVIS_STATUS::ACCEPTED->value => 'Validé',
+                                                    DEVIS_STATUS::REJECTED->value => 'Rejeté',
+                                                ];
+                                                echo $statusLabels[$status] ?? '-';
+                                            ?>
+                                        </span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         <div class="flex justify-center gap-2">
@@ -396,7 +425,7 @@ if ($client_info['date_entree']) {
                                     <td class="px-4 py-3 text-right">
                                         <?= number_format(array_sum(array_column($devis_list, 'montant_ttc')), 2, ',', ' ') ?> €
                                     </td>
-                                    <td></td>
+                                    <td colspan="2"></td>
                                 </tr>
                             </tfoot>
                         </table>
