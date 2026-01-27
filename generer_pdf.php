@@ -27,7 +27,7 @@ foreach ($lignes as $ligne) {
     $totalHT += $montantHT;
     $taux = $ligne['tva'];
     $montantTVA = $montantHT * ($taux / 100);
-    
+
     if (!isset($tvaMap[$taux])) {
         $tvaMap[$taux] = 0;
     }
@@ -36,142 +36,147 @@ foreach ($lignes as $ligne) {
 
 $totalTVA = array_sum($tvaMap);
 $totalTTC = $totalHT + $totalTVA;
-?>
 
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="global.css">
-    <style>
-        @page {
-            margin: 20mm;
-        }
-        @media print {
-            .no-print { display: none !important; }
-        }
-    </style>
-</head>
-<body class="bg-white text-gray-800 text-sm leading-relaxed">
-    <a href="./" class="no-print fixed top-5 left-5 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 shadow-md">
-        ← Retour
-    </a>
-    
-    <button onclick="window.print()" class="no-print fixed top-5 right-5 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 shadow-md">
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-        </svg>
-        Imprimer / PDF
-    </button>
+// Create PDF with TCPDF
+$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
 
-    <div class="p-5 max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between mb-8 pb-5 border-b-2 border-blue-600">
-            <div>
-                <h1 class="text-2xl font-bold text-blue-600 mb-2">POLY Industrie</h1>
-            </div>
-            <div class="text-right">
-                <h2 class="text-xl font-bold text-blue-600 mb-2">DEVIS</h2>
-                <p><strong>Date:</strong> <?= date('d/m/Y') ?></p>
-                <p><strong>Validité:</strong> 30 jours</p>
-            </div>
-        </div>
+// Set document information
+$pdf->SetCreator('POLY Industrie');
+$pdf->SetAuthor('POLY Industrie');
+$pdf->SetTitle('Devis');
+$pdf->SetSubject('Devis Client');
 
-        <!-- Client Section -->
-        <div class="bg-gray-100 p-4 rounded-lg mb-8">
-            <h3 class="font-bold text-gray-900 mb-3 pb-2 border-b border-gray-300">Informations Client</h3>
-            <?php if ($client_info): ?>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="flex">
-                    <label class="font-semibold text-gray-600 min-w-fit mr-4">Nom:</label>
-                    <span class="text-gray-900"><?= htmlspecialchars($client_info['nom'] . ' ' . $client_info['prenom']) ?></span>
-                </div>
-                <div class="flex">
-                    <label class="font-semibold text-gray-600 min-w-fit mr-4">Forme Juridique:</label>
-                    <span class="text-gray-900"><?= htmlspecialchars($client_info['forme_libelle'] ?? '-') ?></span>
-                </div>
-                <div class="flex">
-                    <label class="font-semibold text-gray-600 min-w-fit mr-4">Pays:</label>
-                    <span class="text-gray-900"><?= htmlspecialchars($client_info['pays_libelle'] ?? '-') ?></span>
-                </div>
-                <div class="flex">
-                    <label class="font-semibold text-gray-600 min-w-fit mr-4">N° Sécurité Sociale:</label>
-                    <span class="text-gray-900"><?= htmlspecialchars($client_info['num_sec_soc'] ?? '-') ?></span>
-                </div>
-                <div class="flex">
-                    <label class="font-semibold text-gray-600 min-w-fit mr-4">Date de naissance:</label>
-                    <span class="text-gray-900"><?= $client_info['date_naissance'] ? date('d/m/Y', strtotime($client_info['date_naissance'])) : '-' ?></span>
-                </div>
-                <div class="flex">
-                    <label class="font-semibold text-gray-600 min-w-fit mr-4">Client depuis:</label>
-                    <span class="text-gray-900"><?= $client_info['date_entree'] ? date('d/m/Y', strtotime($client_info['date_entree'])) : '-' ?></span>
-                </div>
-            </div>
-            <?php else: ?>
-            <p class="text-gray-600">Informations client non disponibles</p>
-            <?php endif; ?>
-        </div>
+// Remove default header/footer
+$pdf->setPrintHeader(false);
+$pdf->setPrintFooter(false);
 
-        <!-- Table -->
-        <table class="w-full mb-8 border-collapse">
-            <thead>
-                <tr class="bg-blue-600 text-white">
-                    <th class="px-2 py-3 text-left font-semibold">Code</th>
-                    <th class="px-2 py-3 text-left font-semibold">Désignation</th>
-                    <th class="px-2 py-3 text-right font-semibold">Quantité</th>
-                    <th class="px-2 py-3 text-right font-semibold">Unité</th>
-                    <th class="px-2 py-3 text-right font-semibold">Prix Unit. HT</th>
-                    <th class="px-2 py-3 text-right font-semibold">TVA %</th>
-                    <th class="px-2 py-3 text-right font-semibold">Montant HT</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($lignes as $ligne): ?>
-                <tr class="border-b border-gray-200 hover:bg-gray-50">
-                    <td class="px-2 py-3"><?= htmlspecialchars($ligne['code']) ?></td>
-                    <td class="px-2 py-3"><?= htmlspecialchars($ligne['designation']) ?></td>
-                    <td class="px-2 py-3 text-right"><?= number_format($ligne['quantite'], 2, ',', ' ') ?></td>
-                    <td class="px-2 py-3 text-right"><?= htmlspecialchars($ligne['unite']) ?></td>
-                    <td class="px-2 py-3 text-right"><?= number_format($ligne['forfait'], 2, ',', ' ') ?> €</td>
-                    <td class="px-2 py-3 text-right"><?= number_format($ligne['tva'], 2, ',', ' ') ?> %</td>
-                    <td class="px-2 py-3 text-right"><?= number_format($ligne['montantHT'], 2, ',', ' ') ?> €</td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+// Set margins
+$pdf->SetMargins(15, 15, 15);
+$pdf->SetAutoPageBreak(TRUE, 15);
 
-        <!-- Totals -->
-        <div class="flex justify-end mb-8">
-            <div class="w-80 bg-gray-50 rounded-lg p-4">
-                <div class="flex justify-between py-2 border-b border-gray-200">
-                    <label class="font-medium">Total HT</label>
-                    <span><?= number_format($totalHT, 2, ',', ' ') ?> €</span>
-                </div>
-                
-                <?php ksort($tvaMap); foreach ($tvaMap as $taux => $montant): ?>
-                <div class="flex justify-between py-2 pl-5 text-xs text-gray-600">
-                    <label>TVA <?= number_format($taux, 2, ',', ' ') ?> %</label>
-                    <span><?= number_format($montant, 2, ',', ' ') ?> €</span>
-                </div>
-                <?php endforeach; ?>
-                
-                <div class="flex justify-between py-2 border-b border-gray-200">
-                    <label class="font-medium">Total TVA</label>
-                    <span><?= number_format($totalTVA, 2, ',', ' ') ?> €</span>
-                </div>
-                
-                <div class="flex justify-between py-3 border-t-2 border-blue-600 text-base font-bold text-blue-600 mt-2">
-                    <label>TOTAL TTC</label>
-                    <span><?= number_format($totalTTC, 2, ',', ' ') ?> €</span>
-                </div>
-            </div>
-        </div>
+// Add a page
+$pdf->AddPage();
 
-        <!-- Footer -->
-        <div class="border-t border-gray-200 pt-5 text-center text-xs text-gray-600">
-            <p>POLY Industrie</p>
-            <p>Ce devis est valable 30 jours à compter de sa date d'émission.</p>
+// Set font
+$pdf->SetFont('helvetica', '', 10);
+
+// Build HTML content
+$html = '
+<style>
+    h1 { color: #2563eb; font-size: 20px; margin: 0; }
+    h2 { color: #2563eb; font-size: 16px; margin: 0; }
+    h3 { color: #111827; font-size: 12px; margin: 10px 0 5px 0; border-bottom: 1px solid #d1d5db; padding-bottom: 5px; }
+    .header { margin-bottom: 20px; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
+    .client-box { background-color: #f3f4f6; padding: 10px; margin-bottom: 20px; border-radius: 5px; }
+    .info-row { margin: 5px 0; font-size: 9px; }
+    .info-label { font-weight: bold; color: #4b5563; }
+    table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+    th { background-color: #2563eb; color: white; padding: 8px; text-align: left; font-weight: bold; font-size: 9px; }
+    td { padding: 6px; border-bottom: 1px solid #e5e7eb; font-size: 9px; }
+    .text-right { text-align: right; }
+    .totals-box { background-color: #f9fafb; padding: 10px; margin: 20px 0; border-radius: 5px; }
+    .total-row { margin: 5px 0; font-size: 9px; border-bottom: 1px solid #e5e7eb; padding: 5px 0; }
+    .total-final { font-weight: bold; color: #2563eb; font-size: 11px; border-top: 2px solid #2563eb; padding-top: 8px; margin-top: 5px; }
+    .footer { text-align: center; color: #6b7280; font-size: 8px; border-top: 1px solid #e5e7eb; padding-top: 10px; margin-top: 20px; }
+</style>
+
+<div class="header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <h1>POLY Industrie</h1>
+        <div style="text-align: right;">
+            <h2>DEVIS</h2>
+            <div style="font-size: 9px; margin-top: 5px;"><strong>Date:</strong> ' . date('d/m/Y') . '</div>
+            <div style="font-size: 9px; margin-top: 3px;"><strong>Validité:</strong> 30 jours</div>
         </div>
     </div>
-</body>
-</html>
+</div>
+
+<div class="client-box">
+    <h3>Informations Client</h3>';
+
+if ($client_info) {
+    $html .= '
+    <div class="info-row"><span class="info-label">Nom:</span> ' . htmlspecialchars($client_info['nom'] . ' ' . $client_info['prenom']) . '</div>
+    <div class="info-row"><span class="info-label">Forme Juridique:</span> ' . htmlspecialchars($client_info['forme_libelle'] ?? '-') . '</div>
+    <div class="info-row"><span class="info-label">Pays:</span> ' . htmlspecialchars($client_info['pays_libelle'] ?? '-') . '</div>
+    <div class="info-row"><span class="info-label">N° Sécurité Sociale:</span> ' . htmlspecialchars($client_info['num_sec_soc'] ?? '-') . '</div>
+    <div class="info-row"><span class="info-label">Date de naissance:</span> ' . ($client_info['date_naissance'] ? date('d/m/Y', strtotime($client_info['date_naissance'])) : '-') . '</div>
+    <div class="info-row"><span class="info-label">Client depuis:</span> ' . ($client_info['date_entree'] ? date('d/m/Y', strtotime($client_info['date_entree'])) : '-') . '</div>';
+} else {
+    $html .= '<div class="info-row">Informations client non disponibles</div>';
+}
+
+$html .= '</div>
+
+<table>
+    <thead>
+        <tr>
+            <th style="width: 10%;">Code</th>
+            <th style="width: 30%;">Désignation</th>
+            <th style="width: 10%;" class="text-right">Quantité</th>
+            <th style="width: 8%;" class="text-right">Unité</th>
+            <th style="width: 13%;" class="text-right">Prix Unit. HT</th>
+            <th style="width: 9%;" class="text-right">TVA %</th>
+            <th style="width: 13%;" class="text-right">Montant HT</th>
+        </tr>
+    </thead>
+    <tbody>';
+
+foreach ($lignes as $ligne) {
+    $html .= '
+        <tr>
+            <td>' . htmlspecialchars($ligne['code']) . '</td>
+            <td>' . htmlspecialchars($ligne['designation']) . '</td>
+            <td class="text-right">' . number_format($ligne['quantite'], 2, ',', ' ') . '</td>
+            <td class="text-right">' . htmlspecialchars($ligne['unite']) . '</td>
+            <td class="text-right">' . number_format($ligne['forfait'], 2, ',', ' ') . ' €</td>
+            <td class="text-right">' . number_format($ligne['tva'], 2, ',', ' ') . ' %</td>
+            <td class="text-right">' . number_format($ligne['montantHT'], 2, ',', ' ') . ' €</td>
+        </tr>';
+}
+
+$html .= '
+    </tbody>
+</table>
+
+<div style="text-align: right;">
+    <div class="totals-box" style="width: 250px; display: inline-block;">
+        <div class="total-row">
+            <strong>Total HT:</strong> <span style="float: right;">' . number_format($totalHT, 2, ',', ' ') . ' €</span>
+        </div>';
+
+ksort($tvaMap);
+foreach ($tvaMap as $taux => $montant) {
+    $html .= '
+        <div style="font-size: 8px; color: #6b7280; padding: 3px 0; padding-left: 15px;">
+            TVA ' . number_format($taux, 2, ',', ' ') . ' %: <span style="float: right;">' . number_format($montant, 2, ',', ' ') . ' €</span>
+        </div>';
+}
+
+$html .= '
+        <div class="total-row">
+            <strong>Total TVA:</strong> <span style="float: right;">' . number_format($totalTVA, 2, ',', ' ') . ' €</span>
+        </div>
+        <div class="total-final">
+            <strong>TOTAL TTC:</strong> <span style="float: right;">' . number_format($totalTTC, 2, ',', ' ') . ' €</span>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>POLY Industrie</p>
+    <p>Ce devis est valable 30 jours à compter de sa date d\'émission.</p>
+</div>';
+
+// Output the HTML content
+$pdf->writeHTML($html, true, false, true, false, '');
+
+//if the directory does not exist, create it
+if (!is_dir(__DIR__ . '/files/devis')) {
+    mkdir(__DIR__ . '/files/devis', 0777, true);
+}
+
+// Close and output PDF document
+$pdf->Output(__DIR__ . '/files/devis/devis_' . $client_info['nom'] . '_' . $client_info['prenom'] . date('Y-m-d') . '.pdf', 'F');
+$pdf->Output('/devis_' . date('Y-m-d') . '.pdf', 'I');
+?>
