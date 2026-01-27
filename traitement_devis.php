@@ -1,35 +1,23 @@
 <?php
 require_once 'Ressources_communes.php';
 
-// Check if we have the required data
-if (!isset($_POST['code_client']) || empty($_POST['code_client'])) {
-    die("Erreur: Aucun client sélectionné.");
+function validateInput() {
+    if (!isset($_POST['code_client']) || empty($_POST['code_client'])) {
+        die("Erreur: Aucun client sélectionné.");
+    }
+    if (!isset($_POST['lignes']) || empty($_POST['lignes'])) {
+        die("Erreur: Aucune ligne de devis.");
+    }
 }
 
-if (!isset($_POST['lignes']) || empty($_POST['lignes'])) {
-    die("Erreur: Aucune ligne de devis.");
-}
-
-$code_client = intval($_POST['code_client']);
-$code_devis = isset($_POST['code_devis']) ? intval($_POST['code_devis']) : null;
-$lignes = $_POST['lignes'];
-$is_update = !empty($code_devis);
-$status_devis = intval($_POST['status_devis'] ?? DEVIS_STATUS::ONGOING->value);
-
-try {
-    // Start transaction
-    $db_connection->beginTransaction();
-    
-    // Calculate totals
+function calculateTotals($db_connection, $lignes) {
     $montant_ht_total = 0;
     $montant_tva_total = 0;
     
-    // Get article info for each line to calculate TVA
     foreach ($lignes as $ligne) {
         $code_article = $ligne['code'];
         $quantite = floatval($ligne['quantite']);
         
-        // Get article price and TVA rate
         $stmt = $db_connection->prepare("
             SELECT a.forfait_ht, t.taux 
             FROM Articles a 
@@ -50,47 +38,49 @@ try {
         }
     }
     
-    $montant_ttc_total = $montant_ht_total + $montant_tva_total;
-    
+    return [
+        'montant_ht' => $montant_ht_total,
+        'montant_tva' => $montant_tva_total,
+        'montant_ttc' => $montant_ht_total + $montant_tva_total
+    ];
+}
+
+function saveDevis($db_connection, $code_client, $code_devis, $totals, $status_devis, $is_update) {
     if ($is_update) {
-        // Update existing devis
         $stmt = $db_connection->prepare("
             UPDATE Devis 
             SET montant_ht = :montant_ht, montant_ttc = :montant_ttc, status_devis = :status_devis
             WHERE code_devis = :code_devis
         ");
         $stmt->execute([
-            ':montant_ht' => $montant_ht_total,
-            ':montant_ttc' => $montant_ttc_total,
+            ':montant_ht' => $totals['montant_ht'],
+            ':montant_ttc' => $totals['montant_ttc'],
             ':code_devis' => $code_devis,
             ':status_devis' => $status_devis
         ]);
-        
-        // Delete existing lines
-        $stmt = $db_connection->prepare("DELETE FROM Lignes_Devis WHERE code_devis = :code_devis");
-        $stmt->execute([':code_devis' => $code_devis]);
     } else {
-        // Insert new devis
         $stmt = $db_connection->prepare("
             INSERT INTO Devis (code_client, date_devis, montant_ht, montant_ttc, status_devis) 
             VALUES (:code_client, CURDATE(), :montant_ht, :montant_ttc, :status_devis)
         ");
         $stmt->execute([
             ':code_client' => $code_client,
-            ':montant_ht' => $montant_ht_total,
-            ':montant_ttc' => $montant_ttc_total,
+            ':montant_ht' => $totals['montant_ht'],
+            ':montant_ttc' => $totals['montant_ttc'],
             ':status_devis' => $status_devis
         ]);
         
         $code_devis = $db_connection->lastInsertId();
     }
     
-    // Insert lines (for both new and update)
+    return $code_devis;
+}
+
+function saveLines($db_connection, $code_devis, $lignes) {
     foreach ($lignes as $ligne) {
         $code_article = $ligne['code'];
         $quantite = floatval($ligne['quantite']);
         
-        // Get article price
         $stmt = $db_connection->prepare("
             SELECT forfait_ht FROM Articles WHERE code_article = :code_article
         ");
@@ -114,20 +104,38 @@ try {
             ]);
         }
     }
+}
+
+try {
+    validateInput();
     
-    // Commit transaction
+    $code_client = intval($_POST['code_client']);
+    $code_devis = isset($_POST['code_devis']) ? intval($_POST['code_devis']) : null;
+    $lignes = $_POST['lignes'];
+    $is_update = !empty($code_devis);
+    $status_devis = intval($_POST['status_devis'] ?? DEVIS_STATUS::ONGOING->value);
+    
+    $db_connection->beginTransaction();
+    
+    $totals = calculateTotals($db_connection, $lignes);
+    $code_devis = saveDevis($db_connection, $code_client, $code_devis, $totals, $status_devis, $is_update);
+    
+    if ($is_update) {
+        $stmt = $db_connection->prepare("DELETE FROM Lignes_Devis WHERE code_devis = :code_devis");
+        $stmt->execute([':code_devis' => $code_devis]);
+    }
+    
+    saveLines($db_connection, $code_devis, $lignes);
+    
     $db_connection->commit();
     
-    // Redirect back to client page with appropriate message
     $param = $is_update ? 'devis_updated' : 'devis_created';
-    header("Location: fiche_client.php?client=" . $code_client . "&" . $param . "=" . $code_devis);
+    header("Location: fiche_client.php?client=$code_client&$param=$code_devis");
     exit();
     
 } catch (PDOException $e) {
-    // Rollback on error
     if ($db_connection->inTransaction()) {
         $db_connection->rollBack();
     }
     die("Erreur lors de l'enregistrement du devis: " . $e->getMessage());
 }
-?>
