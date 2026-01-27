@@ -36,9 +36,10 @@ if ($devis && isset($db_connection)) {
 if ($devis_info) {
     // Traduire le statut en texte
     $statusLabels = [
-        0 => 'En cours',
-        1 => 'Imprimé',
-        2 => 'Validé'
+        DEVIS_STATUS::ONGOING->value => 'En cours',
+        DEVIS_STATUS::PRINTED->value => 'Imprimé',
+        DEVIS_STATUS::ACCEPTED->value => 'Validé',
+        DEVIS_STATUS::REJECTED->value => 'Refusé'
     ];
     $devis_info['statut_libelle'] = $statusLabels[$devis_info['status_devis']] ?? 'Inconnu';
 }

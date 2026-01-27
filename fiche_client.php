@@ -546,7 +546,7 @@ if ($client_info['date_entree']) {
                                             DEVIS_STATUS::ONGOING->value => 'En cours',
                                             DEVIS_STATUS::PRINTED->value => 'Imprimé',
                                             DEVIS_STATUS::ACCEPTED->value => 'Validé',
-                                            DEVIS_STATUS::REJECTED->value => 'Rejeté'
+                                            DEVIS_STATUS::REJECTED->value => 'Refusé'
                                         ];
                                         $color_status = [
                                             DEVIS_STATUS::ONGOING->value => 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',

@@ -65,9 +65,10 @@ $totalTTC = $totalHT + $totalTVA;
 
 // Traduire le statut en texte
 $statusLabels = [
-    0 => 'En cours',
-    1 => 'Imprimé',
-    2 => 'Validé'
+    DEVIS_STATUS::ONGOING->value => 'En cours',
+    DEVIS_STATUS::PRINTED->value => 'Imprimé',
+    DEVIS_STATUS::ACCEPTED->value => 'Validé',
+    DEVIS_STATUS::REJECTED->value => 'Refusé'
 ];
 $statut_libelle = $statusLabels[$devis_info['status_devis']] ?? 'Inconnu';
 
@@ -75,7 +76,8 @@ $statut_libelle = $statusLabels[$devis_info['status_devis']] ?? 'Inconnu';
 $badgeColors = [
     'En cours' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
     'Imprimé' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-    'Validé' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+    'Validé' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    'Refusé' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
 ];
 $statusColor = $badgeColors[$statut_libelle] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
 ?>
@@ -313,7 +315,7 @@ $statusColor = $badgeColors[$statut_libelle] ?? 'bg-gray-100 text-gray-800 dark:
                     Retour à la fiche client
                 </a>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <?php if ($devis_info['status_devis'] != 2): ?>
+                    <?php if ($devis_info['status_devis'] != DEVIS_STATUS::ACCEPTED->value): ?>
                         <a href="devis_client.php?client=<?= urlencode($devis_info['code_client']) ?>&devis=<?= urlencode($code_devis) ?>"
                             class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
