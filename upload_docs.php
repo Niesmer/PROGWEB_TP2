@@ -1,7 +1,7 @@
 <?php
 // upload_document.php
 
-require_once 'Ressources_communes.php'; // contient $db_connection PDO
+require_once 'Ressources_communes.php';
 
 $message = '';
 
@@ -86,8 +86,20 @@ $clients = $db_connection->query("SELECT code_client, nom, prenom FROM Clients O
 <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
 <main class="min-h-screen py-8">
     <div class="max-w-3xl px-4 mx-auto">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Uploader un document pour un client</h1>
-
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Télécharger un document client</h1>
+        <div class="flex justify-end mb-4">
+               <a href="recherche_docs.php"
+                class="inline-flex items-center px-5 py-3 text-sm font-medium text-white 
+                        bg-primary-600 rounded-lg hover:bg-primary-700 
+                        focus:ring-4 focus:ring-primary-300">
+                    
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Rechercher document
+                </a>
+            </div>
         <?php if (!empty($message)): ?>
             <div id="messageBox"
                  class="mb-6 p-4 rounded-lg <?= $message['type'] === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">
