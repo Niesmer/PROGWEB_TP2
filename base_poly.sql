@@ -68,6 +68,19 @@ CREATE TABLE IF NOT EXISTS Lignes_Devis(
     FOREIGN KEY (code_article) REFERENCES Articles(code_article)
 );
 
+CREATE TABLE IF NOT EXISTS Files(
+    id_file INT PRIMARY KEY AUTO_INCREMENT,
+    file_name VARCHAR(255),
+    file_path VARCHAR(255),
+    upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    mime_type VARCHAR(100),
+    file_size INT,
+    code_devis INT,
+    code_client INT,
+    FOREIGN KEY (code_devis) REFERENCES Devis(code_devis),
+    FOREIGN KEY (code_client) REFERENCES Clients(code_client)
+);
+
 INSERT IGNORE INTO Pays (code_pays, libelle) VALUES
 ('FR', 'France'),
 ('BE', 'Belgique'),
