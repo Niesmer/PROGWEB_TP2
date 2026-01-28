@@ -119,9 +119,8 @@ if ($client_info['date_entree']) {
 
     <?php include("./components/navbar.php") ?>
 
-    <main>
-        <section class="bg-gray-50 dark:bg-gray-900 min-h-screen py-8">
-            <div class="max-w-7xl mx-auto px-4">
+    <main class="min-h-screen py-8">
+        <div class="max-w-7xl px-4 mx-auto sm:px-6 lg:px-8">
 
                 <!-- Breadcrumb -->
                 <nav class="flex mb-5" aria-label="Breadcrumb">
@@ -272,7 +271,7 @@ if ($client_info['date_entree']) {
                 </div>
 
                 <!-- En-tête client -->
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
                     <div class="px-6 py-8">
                         <div class="flex justify-between">
                             <div class="flex items-center gap-4">
@@ -292,7 +291,7 @@ if ($client_info['date_entree']) {
                             </div>
                             <div class="flex items-center gap-3">
                                 <a href="devis_client.php?client=<?= $client_info['code_client'] ?>"
-                                    class="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 transition-colors">
+                                    class="inline-flex items-center text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -300,7 +299,7 @@ if ($client_info['date_entree']) {
                                     Créer un nouveau devis
                                 </a>
                                 <button onclick="ouvrirModalSuppressionClient(<?= $code_client ?>, '<?= htmlspecialchars($client_info['nom']) ?>', '<?= htmlspecialchars($client_info['prenom']) ?>')" 
-                                    class="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 transition-colors">
+                                    class="inline-flex items-center text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 shadow-lg shadow-red-500/50 dark:shadow-lg dark:shadow-red-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -460,70 +459,76 @@ if ($client_info['date_entree']) {
                 </div>
 
                 <!-- Liste des devis -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6 p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-primary-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Devis du client
-                        </h2>
-                        <!-- Formulaire de recherche de devis -->
+                <div class="relative overflow-hidden bg-white shadow-md dark:bg-gray-800 sm:rounded-lg mb-6">
+                    <div
+                        class="flex flex-col px-6 py-4 space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 lg:space-x-4">
+                        <div class="flex items-center flex-1 space-x-4">
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                <svg class="w-5 h-5 inline-block mr-2 text-primary-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Devis du client
+                            </h2>
+                            <span
+                                class="bg-gray-100 text-gray-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+                                <svg class="w-2.5 h-2.5 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                    fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
+                                </svg>
+                                <?= count($devis_list) ?> devis
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire de recherche de devis -->
+                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                         <form method="get" class="flex gap-4 flex-wrap items-end">
                             <input type="hidden" name="client" value="<?= htmlspecialchars($code_client ?? '') ?>">
 
-                            <div>
+                            <div class="flex-1 min-w-max">
                                 <label for="date_debut"
-                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date à
-                                    partir</label>
+                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date à partir</label>
                                 <input type="date" id="date_debut" name="date_debut"
                                     value="<?= htmlspecialchars($date_debut ?? '') ?>"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                             </div>
 
-                            <div>
+                            <div class="flex-1 min-w-max">
                                 <label for="montant_min"
-                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Montant min
-                                    (€)</label>
+                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Montant min (€)</label>
                                 <input type="number" id="montant_min" step="0.01" name="montant_min"
                                     value="<?= htmlspecialchars($montant_min ?? '') ?>"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                             </div>
 
-                            <div>
+                            <div class="flex-1 min-w-max">
                                 <label for="montant_max"
-                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Montant max
-                                    (€)</label>
+                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Montant max (€)</label>
                                 <input type="number" id="montant_max" step="0.01" name="montant_max"
                                     value="<?= htmlspecialchars($montant_max ?? '') ?>"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                             </div>
 
-                            <div>
-                                <button type="submit"
-                                    class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
-                                    <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                    </svg>
-                                    Filtrer
-                                </button>
-                            </div>
+                            <button type="submit"
+                                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                Filtrer
+                            </button>
                         </form>
-
-                        <span class="text-sm text-gray-500 dark:text-gray-400">
-                            <?= count($devis_list) ?> devis
-                        </span>
                     </div>
 
                     <?php if (empty($devis_list)): ?>
-                        <div class="text-center py-8">
+                        <div class="px-6 py-8 text-center">
                             <p class="text-gray-500 dark:text-gray-400 mb-4">Aucun devis pour ce client</p>
                             <a href="devis_client.php?client=<?= $client_info['code_client'] ?>"
-                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700">
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 4v16m8-8H4" />
@@ -562,7 +567,7 @@ if ($client_info['date_entree']) {
                                             DEVIS_STATUS::REJECTED->value => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                                         ];
                                         ?>
-                                        <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200">
                                             <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
                                                 #<?= htmlspecialchars($devis['code_devis']) ?>
                                             </td>
@@ -594,18 +599,9 @@ if ($client_info['date_entree']) {
                                                     <?php if( $devis['status_devis'] != DEVIS_STATUS::REJECTED->value ): ?>
                                                         <!-- Envoyer par email -->
                                                     <button type="button" onclick="openEmailModal(<?= $devis['code_devis'] ?>, <?= $code_client ?>)"
-                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800">
-                                                        <svg class="w-4 h-4 stroke-blue-700 dark:stroke-blue-300"
-                                                            viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
-                                                                stroke-linejoin="round"></g>
-                                                            <g id="SVGRepo_iconCarrier">
-                                                                <path
-                                                                    d="M4 7L10.94 11.3375C11.5885 11.7428 12.4115 11.7428 13.06 11.3375L20 7M5 18H19C20.1046 18 21 17.1046 21 16V8C21 6.89543 20.1046 6 19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18Z"
-                                                                    stroke-width="2" stroke-linecap="round"
-                                                                    stroke-linejoin="round"></path>
-                                                            </g>
+                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 focus:ring-2 focus:ring-blue-300 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 dark:focus:ring-blue-800">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                                         </svg>
                                                         Envoyer
                                                     </button>
@@ -613,7 +609,7 @@ if ($client_info['date_entree']) {
                                                     <!-- Voir/Modifier -->
                                                     <?php if ($devis['status_devis'] != DEVIS_STATUS::ACCEPTED->value && $devis['status_devis'] != DEVIS_STATUS::REJECTED->value): ?>
                                                         <a href="devis_client.php?client=<?= $code_client ?>&devis=<?= $devis['code_devis'] ?>"
-                                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-primary-700 bg-primary-100 rounded-lg hover:bg-primary-200 dark:bg-primary-900 dark:text-primary-300 dark:hover:bg-primary-800"
+                                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 focus:ring-2 focus:ring-blue-300 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 dark:focus:ring-blue-800"
                                                             title="Modifier le devis">
                                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                                                 viewBox="0 0 24 24">
@@ -627,13 +623,16 @@ if ($client_info['date_entree']) {
 
                                                     <!-- voir -->
                                                     <a href="consulter_devis.php?devis=<?= $devis['code_devis'] ?>"
-                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
                                                         title="Voir le devis">
                                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 stroke-width="2"
-                                                                d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                         </svg>
                                                         Consulter
                                                     </a>
@@ -673,13 +672,13 @@ if ($client_info['date_entree']) {
                                                     <?php if ($devis['status_devis'] !== DEVIS_STATUS::ACCEPTED->value && $devis['status_devis'] !== DEVIS_STATUS::REJECTED->value): ?>
                                                         <form method="post" action="refuser_devis.php" class="inline">
                                                             <input type="hidden" name="code_devis"
-                                                                value="<?= $devis['code_devis'] ?>">
-                                                            <input type="hidden" name="code_client"
-                                                                value="<?= $code_client ?>">
-                                                            <button class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 dark:bg-red-900 dark:hover:bg-red-800"
+                                                                value="<?= $devis['code_devis'] ?>">focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:hover:bg-red-800 dark:focus:ring-red-900"
                                                                 type="submit"
                                                                 title="Refuser le devis">
                                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12ke="currentColor"
                                                                     viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                                         stroke-width="2" d="M5 13l4 4L19 7" />
@@ -713,7 +712,7 @@ if ($client_info['date_entree']) {
                     <?php endif; ?>
                 </div>
             </div>
-        </section>
+        </div>
     </main>
 
     <!-- Modal de suppression de devis -->
