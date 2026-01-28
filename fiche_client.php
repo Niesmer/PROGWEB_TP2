@@ -591,6 +591,8 @@ if ($client_info['date_entree']) {
 
                                             <td class="px-4 py-3 text-center">
                                                 <div class="flex justify-center gap-2">
+                                                    <?php if( $devis['status_devis'] != DEVIS_STATUS::REJECTED->value ): ?>
+                                                        <!-- Envoyer par email -->
                                                     <button type="button" onclick="openEmailModal(<?= $devis['code_devis'] ?>, <?= $code_client ?>)"
                                                         class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800">
                                                         <svg class="w-4 h-4 stroke-blue-700 dark:stroke-blue-300"
@@ -607,8 +609,9 @@ if ($client_info['date_entree']) {
                                                         </svg>
                                                         Envoyer
                                                     </button>
+                                                    <?php endif; ?>
                                                     <!-- Voir/Modifier -->
-                                                    <?php if ($devis['status_devis'] != DEVIS_STATUS::ACCEPTED->value): ?>
+                                                    <?php if ($devis['status_devis'] != DEVIS_STATUS::ACCEPTED->value && $devis['status_devis'] != DEVIS_STATUS::REJECTED->value): ?>
                                                         <a href="devis_client.php?client=<?= $code_client ?>&devis=<?= $devis['code_devis'] ?>"
                                                             class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-primary-700 bg-primary-100 rounded-lg hover:bg-primary-200 dark:bg-primary-900 dark:text-primary-300 dark:hover:bg-primary-800"
                                                             title="Modifier le devis">
@@ -648,12 +651,14 @@ if ($client_info['date_entree']) {
                                                         Supprimer
                                                     </button>
                                                     <!-- valider -->
-                                                    <?php if ($devis['status_devis'] == DEVIS_STATUS::ONGOING->value): ?>
+                                                    <?php if ($devis['status_devis'] !== DEVIS_STATUS::ACCEPTED->value && $devis['status_devis'] !== DEVIS_STATUS::REJECTED->value): ?>
                                                         <form method="post" action="valider_devis.php" class="inline">
                                                             <input type="hidden" name="code_devis"
                                                                 value="<?= $devis['code_devis'] ?>">
-                                                            <button id="btnValiderDevis" type="submit"
-                                                                class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 dark:bg-green-900 dark:hover:bg-green-800"
+                                                            <input type="hidden" name="code_client"
+                                                                value="<?= $code_client ?>">
+                                                            <button class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 dark:bg-green-900 dark:hover:bg-green-800"
+                                                                type="submit"
                                                                 title="Valider le devis">
                                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                                                     viewBox="0 0 24 24">
@@ -662,8 +667,25 @@ if ($client_info['date_entree']) {
                                                                 </svg>
                                                                 Valider
                                                             </button>
-                                                            <!-- <button id="btnValiderDevis" data-devis="<?= $code_devis ?>">Valider le devis</button> -->
+                                                        </form>
+                                                    <?php endif; ?>
 
+                                                    <?php if ($devis['status_devis'] !== DEVIS_STATUS::ACCEPTED->value && $devis['status_devis'] !== DEVIS_STATUS::REJECTED->value): ?>
+                                                        <form method="post" action="refuser_devis.php" class="inline">
+                                                            <input type="hidden" name="code_devis"
+                                                                value="<?= $devis['code_devis'] ?>">
+                                                            <input type="hidden" name="code_client"
+                                                                value="<?= $code_client ?>">
+                                                            <button class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 dark:bg-red-900 dark:hover:bg-red-800"
+                                                                type="submit"
+                                                                title="Refuser le devis">
+                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2" d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                                Refuser
+                                                            </button>
                                                         </form>
                                                     <?php endif; ?>
 
@@ -837,51 +859,6 @@ L'équipe POLY Industrie</textarea>
             if (e.target === this) {
                 fermerModal();
             }
-        });
-        //recharger le devis
-        document.getElementById('btnValiderDevis').addEventListener('click', function (e) {
-            e.preventDefault(); // Empêche le submit classique du formulaire
-            const codeDevis = this.closest('form').querySelector('input[name="code_devis"]').value;
-
-            fetch('valider_devis.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'code_devis=' + codeDevis
-            })
-                .then(response => response.text())
-                .then(data => {
-                    // Remplir l'ID dans le modal
-                    document.getElementById('validatedDevisId').textContent = codeDevis;
-                    // Afficher le modal
-                    document.getElementById('devisvalidationModal').classList.remove('hidden');
-                })
-                .catch(err => alert("Erreur lors de la validation : " + err));
-        });
-
-        // Fonction de fermeture du modal de validation
-        function fermerValidationModal() {
-            document.getElementById('devisvalidationModal').classList.add('hidden');
-        }
-
-        // Fermer le modal si clic en dehors
-        document.getElementById('devisvalidationModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                fermerValidationModal();
-            }
-            const codeDevis = this.dataset.devis;
-
-            fetch('valider_devis.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'code_devis=' + codeDevis
-            })
-                .then(response => response.text())
-                .then(data => {
-                    alert("Le devis a bien été validé !");
-                    location.reload()
-
-                })
-                .catch(err => alert("Erreur lors de la validation : " + err));
         });
 
     </script>
