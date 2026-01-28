@@ -42,9 +42,17 @@ $sql_docs = "
 $params = [];
 
 if (!empty($search_client)) {
-    $sql_docs .= " AND (c.nom LIKE :search_client OR c.prenom LIKE :search_client)";
-    $params[':search_client'] = '%' . $search_client . '%';
+    $search_terms = explode(' ', trim($search_client));
+    if (count($search_terms) >= 2) {
+        $sql_docs .= " AND ((c.nom LIKE :search1 AND c.prenom LIKE :search2) OR (c.nom LIKE :search2 AND c.prenom LIKE :search1))";
+        $params[':search1'] = "%{$search_terms[0]}%";
+        $params[':search2'] = "%{$search_terms[1]}%";
+    } else {
+        $sql_docs .= " AND (c.nom LIKE :search OR c.prenom LIKE :search)";
+        $params[':search'] = "%{$search_client}%";
+    }
 }
+
 
 if (!empty($search_file)) {
     $sql_docs .= " AND f.file_name LIKE :search_file";

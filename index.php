@@ -81,8 +81,15 @@ $sql_clients = "
 $params = [];
 
 if (!empty($search)) {
-    $sql_clients .= " AND (c.nom LIKE :search OR c.prenom LIKE :search)";
-    $params[':search'] = '%' . $search . '%';
+    $search_terms = explode(' ', trim($search));
+    if (count($search_terms) >= 2) {
+        $sql_clients .= " AND ((c.nom LIKE :search1 AND c.prenom LIKE :search2) OR (c.nom LIKE :search2 AND c.prenom LIKE :search1))";
+        $params[':search1'] = "%{$search_terms[0]}%";
+        $params[':search2'] = "%{$search_terms[1]}%";
+    } else {
+        $sql_clients .= " AND (c.nom LIKE :search OR c.prenom LIKE :search)";
+        $params[':search'] = "%{$search}%";
+    }
 }
 
 if (!empty($filter_forme)) {
