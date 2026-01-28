@@ -10,11 +10,11 @@ $stmt = $db_connection->prepare("
     WHERE code_devis = :code_devis
 ");
 $stmt->execute([
-    ':status' => DEVIS_STATUS::ACCEPTED->value,
+    ':status' => DEVIS_STATUS::REJECTED->value,
     ':code_devis' => $code_devis
 ]);
 
-header('Location: fiche_client.php?client='.$code_client.'&devis_validated=1');
+header('Location: fiche_client.php?client='.$code_client.'&devis_refused=1');
 
 exit();
 
