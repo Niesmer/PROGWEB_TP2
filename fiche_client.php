@@ -672,7 +672,9 @@ if ($client_info['date_entree']) {
                                                     <?php if ($devis['status_devis'] !== DEVIS_STATUS::ACCEPTED->value && $devis['status_devis'] !== DEVIS_STATUS::REJECTED->value): ?>
                                                         <form method="post" action="refuser_devis.php" class="inline">
                                                             <input type="hidden" name="code_devis"
-                                                                value="<?= $devis['code_devis'] ?>">focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:hover:bg-red-800 dark:focus:ring-red-900"
+                                                                value="<?= $devis['code_devis'] ?>" 
+                                                                />
+                                                                <button class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 dark:bg-red-900 dark:hover:bg-red-800"
                                                                 type="submit"
                                                                 title="Refuser le devis">
                                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
