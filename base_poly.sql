@@ -51,7 +51,6 @@ CREATE TABLE IF NOT EXISTS Articles(
 CREATE TABLE IF NOT EXISTS Devis(
     code_devis INT PRIMARY KEY AUTO_INCREMENT,
     code_client INT,
-    status_devis INT,
     date_devis DATE,
     montant_ht DECIMAL(10, 2),
     montant_ttc DECIMAL(10, 2),
