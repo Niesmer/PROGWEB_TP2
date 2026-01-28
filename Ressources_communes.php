@@ -2,7 +2,6 @@
 require_once 'vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 // Source - https://stackoverflow.com/a

@@ -1,6 +1,6 @@
 # Requirements
 
-This application uses [**tc-lib-pdf**](https://github.com/tecnickcom/tc-lib-pdf), which requires the GD extension.
+This application uses [**tc-lib-pdf**](https://github.com/tecnickcom/tc-lib-pdf), which requires the PHP GD extension.
 
 **Setup:**
 
@@ -9,5 +9,4 @@ This application uses [**tc-lib-pdf**](https://github.com/tecnickcom/tc-lib-pdf)
    ```ini
    extension=gd
    ```
-
-This prevents compatibility issues during installation.
+3. Configure the `.env` file by renaming `.env.example` to `.env` and fill missing infos
