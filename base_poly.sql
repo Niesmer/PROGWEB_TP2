@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS Clients (
     code_pays CHAR(2),
     date_entree DATE,
     code_motif INT,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (code_forme) REFERENCES Formes_Juridiques(code_forme),
     FOREIGN KEY (code_pays) REFERENCES Pays(code_pays),
     FOREIGN KEY (code_motif) REFERENCES Motifs(code_motif)
@@ -50,9 +51,11 @@ CREATE TABLE IF NOT EXISTS Articles(
 CREATE TABLE IF NOT EXISTS Devis(
     code_devis INT PRIMARY KEY AUTO_INCREMENT,
     code_client INT,
+    status_devis INT,
     date_devis DATE,
     montant_ht DECIMAL(10, 2),
     montant_ttc DECIMAL(10, 2),
+    status_devis INT NOT NULL DEFAULT 0,
     FOREIGN KEY (code_client) REFERENCES Clients(code_client)
 );
 
@@ -66,6 +69,21 @@ CREATE TABLE IF NOT EXISTS Lignes_Devis(
     FOREIGN KEY (code_devis) REFERENCES Devis(code_devis),
     FOREIGN KEY (code_article) REFERENCES Articles(code_article)
 );
+
+CREATE TABLE IF NOT EXISTS Files(
+    id_file INT PRIMARY KEY AUTO_INCREMENT,
+    file_name VARCHAR(255),
+    file_path VARCHAR(255),
+    file_type VARCHAR(255), -- pdf/ image ect
+    file_nature VARCHAR(255), -- cni, devis, contrat ect
+    upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    file_size INT,
+    code_devis INT,
+    code_client INT,
+    FOREIGN KEY (code_devis) REFERENCES Devis(code_devis),
+    FOREIGN KEY (code_client) REFERENCES Clients(code_client)
+);
+
 
 INSERT IGNORE INTO Pays (code_pays, libelle) VALUES
 ('FR', 'France'),
@@ -114,3 +132,4 @@ INSERT IGNORE INTO Articles (code_article, designation, code_unite, forfait_ht, 
 ('A1', 'Intervention à l''heure', 'H', 72, 1),
 ('A2', 'Intervention à la minute', 'M', 1.2, 2),
 ('A3', 'Intervention à la seconde', 'S', 0.02, 3);
+
